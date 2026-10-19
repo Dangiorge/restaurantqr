@@ -4,11 +4,11 @@ import {useEffect,useState} from 'react';
 import Image from 'next/image';
 import MenuIcon from './menu-icons';
 
-export function GuestWelcome({name,logo,hero,table,branch,enter}){
+export function GuestWelcome({name,logo,hero,table,branch,enter,logoRef}){
   return <section className="rg-welcome" aria-label={`Welcome to ${name}`}>
     {hero&&<Image className="rg-welcome-image" src={hero} alt="" fill unoptimized priority sizes="100vw"/>}
     <div className="rg-welcome-shade"/>
-    <div className="rg-welcome-content"><div className="rg-welcome-logo">{logo?<Image src={logo} alt={name} width={168} height={143} unoptimized priority/>:<strong>{name}</strong>}</div><span className="rg-kicker">GOOD FOOD. GREAT COMPANY.</span><h1>A warm welcome.<br/>An unforgettable meal.</h1><p>Find your favourites. Discover something delicious.<br/>Make yourself at home.</p>{table&&<span className="rg-table"><MenuIcon name="pin" size={16}/>{branch} · Table {table}</span>}<button className="rg-enter" onClick={enter}><MenuIcon name="cutlery" size={20}/>View Menu<MenuIcon name="arrow" size={20}/></button><span className="rg-welcome-footnote">{table?'Your table. Your menu. All at your fingertips.':'Scan the QR at your table to order and request service.'}</span></div><div className="rg-welcome-pattern" aria-hidden="true"/>
+    <div className="rg-welcome-content"><div className="rg-welcome-logo" ref={logoRef}>{logo?<Image src={logo} alt={name} width={196} height={196} unoptimized priority/>:<strong>{name}</strong>}</div><span className="rg-kicker">GOOD FOOD. GREAT COMPANY.</span><h1>A warm welcome.<br/>An unforgettable meal.</h1><p>Find your favourites. Discover something delicious.<br/>Make yourself at home.</p>{table&&<span className="rg-table"><MenuIcon name="pin" size={16}/>{branch} · Table {table}</span>}<button className="rg-enter" onClick={enter}><MenuIcon name="cutlery" size={20}/>View Menu<MenuIcon name="arrow" size={20}/></button><span className="rg-welcome-footnote">{table?'Your table. Your menu. All at your fingertips.':'Scan the QR at your table to order and request service.'}</span></div><div className="rg-welcome-pattern" aria-hidden="true"/>
   </section>;
 }
 

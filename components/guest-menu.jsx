@@ -2,11 +2,11 @@
 
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import Image from 'next/image';
-import BrandIntro from './brand-intro';
+import useLogoFlight from './use-logo-flight';
 import GuestDishDetail from './guest-dish-detail';
 import GuestActions from './guest-actions';
 import {GuestWelcome,RecommendationSlider,GuestEvents,ParentCategories} from './guest-discovery';
-import {guestDiscovery,orderInstructions} from '@/modules/menus/discovery.mjs';
+import {guestDiscovery,orderInstructions,nextDiscoveryChange} from '@/modules/menus/discovery.mjs';
 import {brandLogoUrl} from '@/lib/brand.mjs';
 import MenuIcon from './menu-icons';
 import {categoryRows,dietaryLabel,filterMenuCategories} from '@/modules/menus/taxonomy.mjs';
@@ -46,6 +46,10 @@ function Sheet({title,children,close,brand,logo,detail=false}){
 
 export default function GuestMenu({restaurant,menus,branch,table,token,romina=false}){
   const [screen,setScreen]=useState('welcome');
+  const [scheduleNow,setScheduleNow]=useState(undefined);
+  const welcomeLogo=useRef(null);
+  const headerLogo=useRef(null);
+  const flyLogo=useLogoFlight();
   const [itemNotes,setItemNotes]=useState({});
   const [search,setSearch]=useState('');
   const [category,setCategory]=useState('all');
@@ -65,9 +69,9 @@ export default function GuestMenu({restaurant,menus,branch,table,token,romina=fa
   const categories=useMemo(()=>menus.flatMap(m=>categoryRows(m.categories)),[menus]);
   const dishes=useMemo(()=>categories.flatMap(c=>c.items.map(i=>({...i,categoryName:c.name}))),[categories]);
   const documents=menus.filter(m=>m.documentUrl);
-  const discovery=useMemo(()=>guestDiscovery(restaurant.settings?.guestContent,dishes),[restaurant.settings?.guestContent,dishes]);
+  const discovery=useMemo(()=>guestDiscovery(restaurant.settings?.guestContent,dishes,scheduleNow),[restaurant.settings?.guestContent,dishes,scheduleNow]);
   const heroPhoto=discovery.heroUrl||(romina?'/brand/romina-kitchen.webp':dishes.find(i=>i.photoUrl)?.photoUrl);
-  const logo=romina?'/brand/romina-logo.svg':brandLogoUrl(restaurant.logoUrl);
+  const logo=romina?'/brand/romina-emblem.svg':brandLogoUrl(restaurant.logoUrl);
   const lines=useMemo(()=>dishes.filter(i=>cart[i.id]>0).map(i=>({itemId:i.id,quantity:cart[i.id]})),[dishes,cart]);
   const cartKey=JSON.stringify(lines);
   const combinedNotes=orderInstructions(lines,dishes,notes,itemNotes);
@@ -82,12 +86,24 @@ export default function GuestMenu({restaurant,menus,branch,table,token,romina=fa
   const childCategories=categories.filter(c=>c.parentId===currentParent);
   const storageKey=`romina-table:${token||restaurant.slug}`;
   function store(nextCart,nextNotes,nextItemNotes=itemNotes){try{sessionStorage.setItem(storageKey,JSON.stringify({cart:nextCart,notes:nextNotes,itemNotes:nextItemNotes}));}catch{}}
-  function navigate(destination){setScreen(destination);setSearch('');setView(null);window.scrollTo({top:0,behavior:'instant'});}
+  function navigate(destination){
+    const change=()=>{setScreen(destination);setSearch('');setView(null);window.scrollTo({top:0,behavior:'instant'});};
+    flyLogo(screen==='welcome'&&destination!=='welcome'?welcomeLogo.current?.querySelector('img'):null,change,()=>headerLogo.current?.querySelector('img'));
+
+  }
   function selectCategory(id){setCategory(id);navigate('items');}
   function addDish(dish,amount,instructions){const next={...cart,[dish.id]:Math.min(20,(cart[dish.id]||0)+amount)};const nextNotes={...itemNotes,[dish.id]:instructions};setCart(next);setItemNotes(nextNotes);store(next,notes,nextNotes);close();}
   function quantity(id,value){
     const next={...cart,[id]:Math.max(0,Math.min(20,value))};setCart(next);setError('');setQuoteError('');store(next,notes);
   }
+  useEffect(()=>{
+    let timer;
+    function refresh(){const now=Date.now();setScheduleNow(now);timer=setTimeout(refresh,nextDiscoveryChange(restaurant.settings?.guestContent,now));}
+    timer=setTimeout(refresh,0);
+    function visible(){if(!document.hidden){clearTimeout(timer);refresh();}}
+    document.addEventListener('visibilitychange',visible);
+    return()=>{clearTimeout(timer);document.removeEventListener('visibilitychange',visible);};
+  },[restaurant.settings?.guestContent]);
   const close=useCallback(()=>{setView(null);setError('');},[]);
   useEffect(()=>{
     Promise.resolve().then(()=>{
@@ -154,9 +170,9 @@ export default function GuestMenu({restaurant,menus,branch,table,token,romina=fa
   }
   function openDish(dish){setSelected(dish);setView('dish');}
   const listing=screen==='items'||Boolean(search.trim());
-  return <main className={`rm-menu rg-experience ${screen==='welcome'?'rg-stage-welcome':''}`} style={{'--rm-red':color}}>{romina&&<BrandIntro/>}
-    {screen==='welcome'?<GuestWelcome name={restaurant.name} logo={logo} hero={heroPhoto} table={table} branch={branch} enter={()=>navigate('menu')}/>:<>
-      <header className="rm-header rg-header"><button className="rm-icon-button" aria-label={screen==='items'?'Back to categories':'Back to welcome'} onClick={()=>navigate(screen==='items'?'menu':'welcome')}><MenuIcon name="back"/></button><button className="rg-header-logo" onClick={()=>navigate('menu')} aria-label="Menu home">{logo?<Image className="rm-brand-logo" src={logo} alt={restaurant.name} width={100} height={85} unoptimized priority/>:<strong>{restaurant.name}</strong>}</button><button className="rm-header-cart rm-icon-button" onClick={()=>setView('cart')} aria-label={`Open cart, ${count} items`}><MenuIcon name="cart"/>{count>0&&<span>{count}</span>}</button></header>
+  return <main className={`rm-menu rg-experience ${screen==='welcome'?'rg-stage-welcome':''}`} style={{'--rm-red':color}}>
+    {screen==='welcome'?<GuestWelcome logoRef={welcomeLogo} name={restaurant.name} logo={logo} hero={heroPhoto} table={table} branch={branch} enter={()=>navigate('menu')}/>:<>
+      <header className="rm-header rg-header"><button className="rm-icon-button" aria-label={screen==='items'?'Back to categories':'Back to welcome'} onClick={()=>navigate(screen==='items'?'menu':'welcome')}><MenuIcon name="back"/></button><button ref={headerLogo} className="rg-header-logo" onClick={()=>navigate('menu')} aria-label="Menu home">{logo?<Image className="rm-brand-logo" src={logo} alt={restaurant.name} width={64} height={64} unoptimized priority/>:null}<span className="rg-brand-title"><strong>{restaurant.name}</strong><small>Good food. Great company.</small></span></button><button className="rm-header-cart rm-icon-button" onClick={()=>setView('cart')} aria-label={`Open cart, ${count} items`}><MenuIcon name="cart"/>{count>0&&<span>{count}</span>}</button></header>
       <div className="rm-main rg-main">{table&&<p className="rg-table-context"><MenuIcon name="pin" size={14}/>{branch} &middot; Table {table}</p>}
       {receipt&&<button className="rm-order-progress" onClick={()=>setView('receipt')}><span className="rm-progress-icon"><MenuIcon name={receipt.status==='COMPLETED'?'check':'clock'} size={19}/></span><span><small>Your latest order</small><strong>{statusLabels[receipt.status]}</strong></span><MenuIcon name="arrow" size={18}/></button>}
       {service&&service.status!=='RESOLVED'&&<button className="rm-service-progress" onClick={()=>setView('service-sent')}>{serviceTypes.find(t=>t[0]===service.type)?.[2]} · {statusLabels[service.status]} <MenuIcon name="arrow" size={15}/></button>}

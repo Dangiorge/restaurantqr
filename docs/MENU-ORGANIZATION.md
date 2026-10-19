@@ -6,6 +6,10 @@ Workspace → Menus → **Guest welcome & discovery** manages the welcome backgr
 
 Migration `20261019190000_guest_discovery` adds one optional JSON settings column. No sample events or menu items are inserted into the application database.
 
+The **Welcome background library** accepts multiple image uploads at once (up to 20 total). Each image has an enable switch, optional show/hide times, priority from 0–100, and an optional event link. Higher priority wins; active event links win ties, followed by the latest start time. An event-linked background requires both its own schedule and the event's published schedule to be active. If no library image qualifies, the fallback image is used. Open guest pages re-evaluate at schedule boundaries and at least every 30 seconds. Removing an event disables its linked backgrounds. Save guest experience to publish changes.
+
+Guest pages use the original circular SVG emblem without the stacked wordmark. It drops and bounces into place on entry, then visually moves into the menu header on View Menu, with the restaurant name to its right. Reduced-motion users receive an immediate transition. The primary stacked brand asset remains available for the website and print cards.
+
 In Workspace → Menus, add or edit a dish and select its **Dietary type**: Vegan, Non-vegan, or Not specified. Existing dishes remain Not specified until staff classify them. Additional dietary labels and allergens remain separate fields. The workspace list can filter by all three classifications.
 
 Guests can combine Vegan or Non-vegan with category navigation and dish search. Unclassified dishes appear under All and are excluded from the Vegan and Non-vegan filters. Changing a filter does not clear the cart. Classified dishes show their dietary type on the card and in the detail view.

@@ -44,5 +44,8 @@ try{
   if(paths.length!==22)throw new Error(`Unexpected primary artwork: ${paths.length} paths.`);
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="582 231 398 338.3" role="img" aria-labelledby="title"><title id="title">Romina Restaurants</title><g transform="translate(0 841.89) scale(1 -1)">${paths.join('')}</g></svg>\n`;
   writeFileSync('public/brand/romina-logo.svg',svg);
+  const emblemPaths=paths.filter(path=>!path.includes('fill="#000000"'));
+  if(emblemPaths.length!==5)throw new Error('Unexpected emblem paths.');
+  writeFileSync('public/brand/romina-emblem.svg',`<svg xmlns="http://www.w3.org/2000/svg" viewBox="686.7946 245.7008 196.558 196.558" role="img" aria-labelledby="title"><title id="title">Romina emblem</title><g transform="translate(0 841.89) scale(1 -1)">${emblemPaths.join('')}</g></svg>\n`);
   console.log(`Extracted ${paths.length} original vector paths; no fonts or embedded images.`);
 }finally{await document.destroy();}
