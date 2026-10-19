@@ -10,7 +10,11 @@ export default function GuestActions({count,total,busy,menu,cart,call,help}){
   const panelId=useId();
   useEffect(()=>{
     if(!open)return;
-    const frame=requestAnimationFrame(()=>root.current?.querySelector('nav button')?.focus({preventScroll:true}));
+    const frame=requestAnimationFrame(()=>{
+      const navigation=root.current?.querySelector('nav');
+      if(navigation)navigation.scrollLeft=0;
+      navigation?.querySelector('button')?.focus({preventScroll:true});
+    });
     function outside(event){if(!root.current?.contains(event.target))setOpen(false);}
     function escape(event){if(event.key==='Escape'){setOpen(false);toggle.current?.focus();}}
     document.addEventListener('pointerdown',outside);
