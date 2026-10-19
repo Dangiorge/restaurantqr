@@ -15,7 +15,11 @@ Open [the workspace](http://localhost:3000/workspace), create an account, then c
 
 `BETTER_AUTH_URL` must match the browser origin, including port. The current local default is `http://localhost:3000`. Set a publicly reachable HTTPS origin before printing operational QR codes; a guest's phone cannot reach your computer through its own localhost. Generate a new high-entropy `BETTER_AUTH_SECRET` for each deployment and keep all credentials server-side.
 
+On Vercel, configure `BETTER_AUTH_URL` in Project Settings → Environment Variables as the complete public origin, for example `https://restaurantqr-zeta.vercel.app`, for the target deployment environment. Save it and redeploy to apply the value. A hostname pasted without a scheme is normalized to HTTPS consistently for server authentication, workspace prerendering, request-origin checks, and printed/downloaded QR links. Local development should retain its explicit `http://localhost:3000` URL. Paths, query strings, fragments, and embedded credentials are rejected. The browser auth client uses its current page origin.
+
 ## Implemented
+
+Dietary selectors, guest filters, and parent/child categories are documented in [Menu organization](docs/MENU-ORGANIZATION.md).
 
 - Email/password registration, sign-in/out and persisted sessions with account-status checks and database-backed authentication rate limiting.
 - Restaurant onboarding, memberships, settings, configurable branding, branches, time zones and weekly hours.

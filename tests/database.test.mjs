@@ -9,6 +9,7 @@ import { context } from '../modules/identity/context.mjs';
 import { authentication } from '../lib/auth.mjs';
 import { currentUser, sameOrigin } from '../lib/http.mjs';
 import {quoteOrder,placeOrder,requestService,guestStatus,operations,updateOperation} from '../modules/ordering/service.mjs';
+import {publicRestaurant} from '../modules/menus/public.mjs';
 
 test('Phase 1 disposable PostgreSQL schema integration', { skip: !process.env.DATABASE_URL }, async t => {
   const manifest = JSON.parse(readFileSync('.local/database-verification.json', 'utf8'));
@@ -17,7 +18,7 @@ test('Phase 1 disposable PostgreSQL schema integration', { skip: !process.env.DA
   assert.equal(fingerprint, manifest.fingerprint, 'Use the verified development database only');
   const schema = `qrmenu_test_${randomUUID().replaceAll('-', '')}`;
   const admin = new pg.Client({ connectionString: process.env.DATABASE_URL });
-  const sql = readFileSync('prisma/migrations/20261019090000_phase_one/migration.sql', 'utf8') + '\n' + readFileSync('prisma/migrations/20261019110000_menu_document/migration.sql', 'utf8')+'\n'+readFileSync('prisma/migrations/20261019140000_guest_ordering/migration.sql','utf8');
+  const sql = readFileSync('prisma/migrations/20261019090000_phase_one/migration.sql', 'utf8') + '\n' + readFileSync('prisma/migrations/20261019110000_menu_document/migration.sql', 'utf8')+'\n'+readFileSync('prisma/migrations/20261019140000_guest_ordering/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019170000_menu_taxonomy/migration.sql','utf8');
   assert.doesNotMatch(sql, /^\s*(DROP|TRUNCATE|DELETE|UPDATE)\b/im);
   let db;
   await admin.connect();
@@ -192,6 +193,42 @@ test('Phase 1 disposable PostgreSQL schema integration', { skip: !process.env.DA
       await assert.rejects(requestService(db,live.token,{type:'HELP',requestKey:randomUUID()}),e=>e.status===404);
       await assert.rejects(quoteOrder(db,live.token,{items:[{itemId:item.id,quantity:1}]}),e=>e.status===404);
       assert.equal((await guestStatus(db,first.reference,'service')).status,'RESOLVED');
+    });
+    await t.test('dietary classification and parent categories preserve menu scope and hidden-parent ordering rules',async()=>{
+      const tenant=await onboard(db,a,{name:'Taxonomy test',slug:'taxonomy-test'});
+      const menu=await db.menu.findFirst({where:{restaurantId:tenant.id}});
+      const otherMenu=await mutate(db,a,tenant.id,'menus',{name:'Other menu'});
+      const root=await mutate(db,a,tenant.id,'categories',{menuId:menu.id,name:'Traditional'});
+      const child=await mutate(db,a,tenant.id,'categories',{menuId:menu.id,parentId:root.id,name:'Stews'});
+      const dish=await mutate(db,a,tenant.id,'items',{categoryId:child.id,name:'Shiro',basePrice:'100.00',dietaryType:'VEGAN'});
+      assert.equal((await db.menuItem.findUnique({where:{id:dish.id}})).dietaryType,'VEGAN');
+      await assert.rejects(mutate(db,a,tenant.id,'categories',{menuId:menu.id,parentId:child.id,name:'Too deep'}),e=>e.status===400);
+      await assert.rejects(mutate(db,a,tenant.id,'categories',{menuId:menu.id,parentId:root.id,name:'Self'},root.id),e=>e.status===400);
+      await assert.rejects(mutate(db,a,tenant.id,'categories',{menuId:otherMenu.id,parentId:root.id,name:'Wrong menu'}),e=>e.status===404);
+      await assert.rejects(mutate(db,a,tenant.id,'categories',{menuId:otherMenu.id,name:'Move parent'},root.id),e=>e.status===400);
+      const foreign=await db.menuCategory.findFirst({where:{restaurantId:rb.id}});
+      await assert.rejects(mutate(db,a,tenant.id,'categories',{menuId:menu.id,parentId:foreign.id,name:'Wrong tenant'}),e=>e.status===404);
+      await assert.rejects(db.menuCategory.create({data:{restaurantId:tenant.id,menuId:otherMenu.id,parentId:root.id,name:'Invalid FK'}}));
+      const root2=await mutate(db,a,tenant.id,'categories',{menuId:menu.id,name:'Other root'});
+      await assert.rejects(mutate(db,a,tenant.id,'categories',{menuId:menu.id,parentId:root2.id,name:'Traditional'},root.id),e=>e.status===400);
+      const root3=await mutate(db,a,tenant.id,'categories',{menuId:menu.id,name:'Third root'});
+      const attempts=await Promise.allSettled([
+        mutate(db,a,tenant.id,'categories',{menuId:menu.id,parentId:root3.id,name:'Other root'},root2.id),
+        mutate(db,a,tenant.id,'categories',{menuId:menu.id,parentId:root2.id,name:'Third root'},root3.id),
+      ]);
+      assert.equal(attempts.filter(result=>result.status==='fulfilled').length,1,'concurrent writes cannot create a cycle');
+      const branch=await mutate(db,a,tenant.id,'branches',{name:'Taxonomy branch'});
+      const table=await mutate(db,a,tenant.id,'tables',{branchId:branch.id,name:'1'});
+      await mutate(db,a,tenant.id,'qr',{tableId:table.id,action:'generate'});
+      const qr=await db.qrCode.findFirst({where:{tableId:table.id,revokedAt:null}});
+      assert.equal((await quoteOrder(db,qr.token,{items:[{itemId:dish.id,quantity:1}]})).subtotal,'100.00');
+      const publicProfile=await publicRestaurant(db,'taxonomy-test');
+      assert.equal(publicProfile.menus[0].categories.find(c=>c.id===child.id).parentId,root.id);
+      assert.equal(publicProfile.menus[0].categories.find(c=>c.id===child.id).items[0].dietaryType,'VEGAN');
+      await mutate(db,a,tenant.id,'categories',{menuId:menu.id,name:'Traditional',active:false},root.id);
+      assert.ok(!(await publicRestaurant(db,'taxonomy-test')).menus[0].categories.some(c=>c.id===child.id));
+      assert.ok(!(await resolveQr(db,qr.token)).menus[0].categories.some(c=>c.id===child.id));
+      await assert.rejects(quoteOrder(db,qr.token,{items:[{itemId:dish.id,quantity:1}]}),e=>e.status===409);
     });
     await t.test('authentication persists sessions and rejects privilege injection and suspended users', async () => {
       const previousDb = globalThis.qrmenuDatabase;

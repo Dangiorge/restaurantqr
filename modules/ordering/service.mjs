@@ -2,6 +2,7 @@ import {createHash,randomBytes} from 'node:crypto';
 import {z} from 'zod';
 import {HttpError} from '../../lib/http.mjs';
 import {context} from '../identity/context.mjs';
+import {visibleCategoryWhere} from '../menus/public.mjs';
 
 const token=()=>randomBytes(32).toString('base64url');
 const key=z.uuid();
@@ -33,7 +34,7 @@ export async function tableContext(db,raw){
 }
 async function quoteForTable(db,qr,data){
   if(new Set(data.items.map(i=>i.itemId)).size!==data.items.length)throw new HttpError(400,'Combine duplicate dishes before ordering.');
-  const dishes=await db.menuItem.findMany({where:{restaurantId:qr.restaurantId,id:{in:data.items.map(i=>i.itemId)},active:true,available:true,category:{active:true,menu:{active:true,restaurantId:qr.restaurantId}}}});
+  const dishes=await db.menuItem.findMany({where:{restaurantId:qr.restaurantId,id:{in:data.items.map(i=>i.itemId)},active:true,available:true,category:{...visibleCategoryWhere,menu:{active:true,restaurantId:qr.restaurantId}}}});
   if(dishes.length!==data.items.length)throw new HttpError(409,'A dish is unavailable or has been removed. Refresh your menu and review your order.');
   const settings=qr.table.branch.restaurant.settings;
   if(!settings||settings.currency!=='ETB')throw new HttpError(409,'Ordering is unavailable at this restaurant. Please ask our team.');

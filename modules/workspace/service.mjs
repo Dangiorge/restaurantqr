@@ -3,6 +3,7 @@ import { HttpError } from '../../lib/http.mjs';
 import { context, tenantWide, branchFilter } from '../identity/context.mjs';
 import { authorizeGrant, defaultRoles, permissions } from '../identity/permissions.mjs';
 import * as v from '../validation.mjs';
+import {publicMenuSelect} from '../menus/public.mjs';
 
 export const hashToken = token => createHash('sha256').update(token).digest('hex');
 const token = () => randomBytes(32).toString('base64url');
@@ -63,6 +64,7 @@ export async function mutate(db, user, restaurantId, resource, input, recordId) 
   return db.$transaction(async tx => {
     const ctx = await context(tx, user, restaurantId, spec.permission, data.branchId);
     if (spec.global) tenantWide(ctx);
+    if(resource==='categories')await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`menu-categories:${restaurantId}`},0))`;
     const existing = recordId ? required(await tx[spec.model].findFirst({ where: { id: recordId, restaurantId, ...(!spec.global && ctx.branchIds !== null ? { branchId: { in: ctx.branchIds } } : {}) } })) : null;
     if (existing?.branchId) await context(tx, user, restaurantId, spec.permission, existing.branchId);
     if (existing?.branchId && existing.branchId !== data.branchId) throw new HttpError(400, 'Create a new table or area to change its branch.');
@@ -70,6 +72,14 @@ export async function mutate(db, user, restaurantId, resource, input, recordId) 
     if (data.areaId) required(await tx.diningArea.findFirst({ where: { id: data.areaId, restaurantId, branchId: data.branchId } }));
     if (data.menuId) required(await tx.menu.findFirst({ where: { id: data.menuId, restaurantId } }));
     if (data.categoryId) required(await tx.menuCategory.findFirst({ where: { id: data.categoryId, restaurantId } }));
+    if(resource==='categories'){
+      if(data.parentId){
+        if(data.parentId===recordId)throw new HttpError(400,'A category cannot be its own parent.');
+        const parent=required(await tx.menuCategory.findFirst({where:{id:data.parentId,restaurantId,menuId:data.menuId}}));
+        if(parent.parentId)throw new HttpError(400,'Choose a top-level parent category. Only parent and child categories are supported.');
+      }
+      if(existing&&(data.parentId||data.menuId!==existing.menuId)&&await tx.menuCategory.count({where:{restaurantId,parentId:existing.id}}))throw new HttpError(400,'Move this category’s children first before changing its parent or menu.');
+    }
     if (resource === 'items' && (!existing || existing.basePrice.toFixed(2) !== Number(data.basePrice).toFixed(2))) {
       await context(tx, user, restaurantId, 'prices.manage');
     }
@@ -184,7 +194,7 @@ export async function resolveQr(db, raw) {
   const qr = await db.qrCode.findFirst({ where: { token: raw, revokedAt: null, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }], table: { active: true, branch: { active: true, restaurant: { status: 'ACTIVE' } } } }, select: { table: { select: { name: true, branch: { select: { name: true, restaurant: { select: { id: true, slug: true, name: true, description: true, logoUrl: true, primaryColor: true, settings: { select: { currency: true, taxRate: true, serviceChargeRate: true } } } } } } } } } });
   if (!qr) return null;
   const restaurant = qr.table.branch.restaurant;
-  const menus = await db.menu.findMany({ where: { restaurantId: restaurant.id, active: true }, select: { name: true, documentUrl: true, categories: { where: { active: true }, orderBy: { displayOrder: 'asc' }, select: { id: true, name: true, items: { where: { active: true }, orderBy: { displayOrder: 'asc' }, select: { id: true, name: true, description: true, photoUrl: true, basePrice: true, available: true, dietaryLabels: true, allergens: true } } } } } });
+  const menus = await db.menu.findMany({ where: { restaurantId: restaurant.id, active: true }, select:publicMenuSelect });
   const { id: _id, ...profile } = restaurant;
   return { restaurant: profile, branch: qr.table.branch.name, table: qr.table.name, menus };
 }

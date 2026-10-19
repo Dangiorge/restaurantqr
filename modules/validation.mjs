@@ -12,8 +12,8 @@ export const branchInput = z.object({ name, address: text, phone: z.string().max
 export const areaInput = z.object({ branchId: id, name }).strict();
 export const tableInput = z.object({ branchId: id, name, areaId: id.nullable().default(null), active: z.boolean().default(true) }).strict();
 export const menuInput = z.object({ name, documentUrl: url, active: z.boolean().default(true) }).strict();
-export const categoryInput = z.object({ menuId: id, name, displayOrder: z.coerce.number().int().min(0).max(9999).default(0), active: z.boolean().default(true) }).strict();
-export const itemInput = z.object({ categoryId: id, name, description: text, photoUrl: url, basePrice: money, active: z.boolean().default(true), available: z.boolean().default(true), dietaryLabels: z.array(name).max(12).default([]), allergens: z.array(name).max(20).default([]), displayOrder: z.coerce.number().int().min(0).max(9999).default(0) }).strict();
+export const categoryInput = z.object({ menuId: id, parentId: z.preprocess(v=>v===''?null:v,id.nullable()).default(null), name, displayOrder: z.coerce.number().int().min(0).max(9999).default(0), active: z.boolean().default(true) }).strict();
+export const itemInput = z.object({ categoryId: id, name, description: text, photoUrl: url, basePrice: money, active: z.boolean().default(true), available: z.boolean().default(true), dietaryType:z.enum(['UNSPECIFIED','VEGAN','NON_VEGAN']).default('UNSPECIFIED'), dietaryLabels: z.array(name).max(12).default([]), allergens: z.array(name).max(20).default([]), displayOrder: z.coerce.number().int().min(0).max(9999).default(0) }).strict();
 export const roleInput = z.object({ name, permissions: z.array(z.string()).max(40) }).strict();
 export const invitationInput = z.object({ email: z.email().transform(v => v.toLowerCase()), roleId: id, allBranches: z.boolean().default(false), branchIds: z.array(id).max(100).default([]) }).strict();
 export const memberInput = z.object({ roleId: id, status: z.enum(['ACTIVE','SUSPENDED']), allBranches: z.boolean(), branchIds: z.array(id).max(100) }).strict();

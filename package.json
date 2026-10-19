@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test --test-isolation=none tests/permissions.test.mjs tests/validation.test.mjs tests/service-security.test.mjs tests/media.test.mjs tests/database-cache.test.mjs tests/ordering.test.mjs",
+    "test": "node --test --test-isolation=none tests/permissions.test.mjs tests/validation.test.mjs tests/service-security.test.mjs tests/media.test.mjs tests/database-cache.test.mjs tests/ordering.test.mjs tests/app-origin.test.mjs tests/taxonomy.test.mjs",
     "test:db": "node --env-file=.env --test --test-isolation=none tests/*.test.mjs",
     "test:browser": "node --env-file=.env scripts/browser-check.mjs",
     "db:inspect": "node --env-file=.env scripts/inspect-database.mjs",

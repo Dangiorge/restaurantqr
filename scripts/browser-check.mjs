@@ -30,7 +30,7 @@ await connection.connect();
 try {
   await connection.query(`CREATE SCHEMA "${schema}"`);
   await connection.query(`SET search_path TO "${schema}"`);
-  await connection.query((readFileSync('prisma/migrations/20261019090000_phase_one/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019110000_menu_document/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019140000_guest_ordering/migration.sql','utf8')).replace('CREATE SCHEMA IF NOT EXISTS "public";',''));
+  await connection.query((readFileSync('prisma/migrations/20261019090000_phase_one/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019110000_menu_document/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019140000_guest_ordering/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019170000_menu_taxonomy/migration.sql','utf8')).replace('CREATE SCHEMA IF NOT EXISTS "public";',''));
   // Do not leave an unused admin connection open while the browser works;
   // managed database proxies may close an idle connection between steps.
   await connection.end();
@@ -79,6 +79,12 @@ try {
   await page.locator('select[name="menuId"]').selectOption({label:'Main menu'});
   await page.getByRole('button',{name:'Save changes'}).click();
   await page.getByRole('dialog').waitFor({state:'hidden'});
+  await page.getByRole('button',{name:'+ Category'}).click();
+  await page.getByLabel('Category name').fill('Stews');
+  await page.locator('select[name="menuId"]').selectOption({label:'Main menu'});
+  await page.getByLabel('Parent category').selectOption({label:'Mains'});
+  await page.getByRole('button',{name:'Save changes'}).click();
+  await page.getByRole('dialog').waitFor({state:'hidden'});
   let uploadedMenu;
   if(!guestOnly){
     await page.getByRole('button',{name:'Edit menu',exact:true}).click();
@@ -91,12 +97,18 @@ try {
   }
   await page.getByRole('button',{name:'+ Add dish'}).click();
   await page.getByLabel('Dish name').fill('Test pasta');
-  await page.locator('select[name="categoryId"]').selectOption({label:'Mains'});
+  await page.locator('select[name="categoryId"]').selectOption({label:'Mains / Stews'});
+  await page.locator('select[name="dietaryType"]').selectOption('VEGAN');
   await page.getByLabel('Base price (ETB)').fill('350.50');
   await page.getByLabel('Description',{exact:true}).fill('A browser test dish.');
   if(!guestOnly)await uploadInput('Upload dish photo','public/brand/romina-kitchen.webp');
   await page.getByRole('button',{name:'Save changes'}).click();
   await page.getByRole('cell',{name:'350.50 ETB'}).waitFor();
+  await page.getByRole('combobox',{name:'Filter dishes by dietary type'}).selectOption('NON_VEGAN');
+  await page.getByText('No dishes match this dietary type.').waitFor();
+  await page.getByRole('combobox',{name:'Filter dishes by dietary type'}).selectOption('VEGAN');
+  await page.getByRole('cell',{name:'350.50 ETB'}).waitFor();
+  await page.getByRole('combobox',{name:'Filter dishes by dietary type'}).selectOption('all');
   if(guestOnly)await fixtureQuery(`UPDATE "${schema}"."MenuItem" SET "photoUrl"=$1`,['/brand/romina-kitchen.webp']);
   await page.getByRole('button',{name:'Tables & QR',exact:true}).click();
   await page.getByRole('button',{name:'+ Add table'}).click();
@@ -111,6 +123,16 @@ try {
   await menuPage.setViewportSize({width:390,height:844});
   await menuPage.goto(`${base}${menuUrl}`);
   await menuPage.getByRole('heading',{name:'Test pasta'}).waitFor();
+  await menuPage.getByRole('navigation',{name:'Menu categories'}).getByRole('button',{name:'Mains',exact:true}).click();
+  await menuPage.getByRole('navigation',{name:'Child categories'}).getByRole('button',{name:'Stews',exact:true}).click();
+  const diets=menuPage.getByRole('group',{name:'Dietary filters'});
+  await diets.getByRole('button',{name:'Non-vegan',exact:true}).click();
+  await menuPage.getByRole('heading',{name:'No matching dishes.'}).waitFor();
+  await diets.getByRole('button',{name:'Vegan',exact:true}).click();
+  await menuPage.getByRole('heading',{name:'Test pasta',exact:true}).waitFor();
+  assert.equal(await diets.getByRole('button',{name:'Vegan',exact:true}).getAttribute('aria-pressed'),'true');
+  await menuPage.screenshot({path:'.local/previews/guest-dietary-categories.png',fullPage:true});
+  await diets.getByRole('button',{name:'All',exact:true}).click();
   await menuPage.getByText('Prefer our printed menu?').click();
   await menuPage.getByRole('link',{name:/View Main menu/}).waitFor();
   await menuPage.locator('.rm-dish-photo').scrollIntoViewIfNeeded();
@@ -118,7 +140,7 @@ try {
   const guestPage=await guestContext.newPage();await guestPage.goto(`${base}/menu`);
   await guestPage.getByRole('heading',{name:'Test pasta'}).waitFor();
   await guestPage.getByRole('searchbox',{name:'Search the menu'}).fill('missing dish');
-  await guestPage.getByRole('heading',{name:'No dishes found.'}).waitFor();
+  await guestPage.getByRole('heading',{name:'No matching dishes.'}).waitFor();
   await guestPage.getByRole('navigation',{name:'Table actions'}).getByRole('button',{name:'Ask for bill',exact:true}).click();
   await guestPage.getByRole('heading',{name:'Join us at the table',exact:true}).waitFor();
   await guestPage.getByRole('button',{name:'Close',exact:true}).click();
