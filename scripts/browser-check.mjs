@@ -18,6 +18,7 @@ async function fixtureQuery(sql,values){
   await client.connect();
   try{return await client.query(sql,values);}finally{await client.end();}
 }
+async function openActions(page){const toggle=page.getByRole('button',{name:'More',exact:true});if(await toggle.getAttribute('aria-expanded')!=='true')await toggle.click();}
 const chrome = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 assert.ok(existsSync(chrome), 'Install Chrome or set CHROME_PATH.');
 let server, browser;
@@ -30,7 +31,7 @@ await connection.connect();
 try {
   await connection.query(`CREATE SCHEMA "${schema}"`);
   await connection.query(`SET search_path TO "${schema}"`);
-  await connection.query((readFileSync('prisma/migrations/20261019090000_phase_one/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019110000_menu_document/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019140000_guest_ordering/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019170000_menu_taxonomy/migration.sql','utf8')).replace('CREATE SCHEMA IF NOT EXISTS "public";',''));
+  await connection.query((readFileSync('prisma/migrations/20261019090000_phase_one/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019110000_menu_document/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019140000_guest_ordering/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019170000_menu_taxonomy/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019190000_guest_discovery/migration.sql','utf8')).replace('CREATE SCHEMA IF NOT EXISTS "public";',''));
   // Do not leave an unused admin connection open while the browser works;
   // managed database proxies may close an idle connection between steps.
   await connection.end();
@@ -43,6 +44,7 @@ try {
   assert.ok(ready, 'Isolated application server must start');
   browser = await chromium.launch({ executablePath: chrome, headless: true });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  await context.route('https://images.example.test/**',route=>route.fulfill({path:'public/brand/romina-kitchen.webp',contentType:'image/webp'}));
   const page = await context.newPage();
   page.on('pageerror', error => errors.push(error.message));
   page.setDefaultTimeout(45000);
@@ -110,6 +112,15 @@ try {
   await page.getByRole('cell',{name:'350.50 ETB'}).waitFor();
   await page.getByRole('combobox',{name:'Filter dishes by dietary type'}).selectOption('all');
   if(guestOnly)await fixtureQuery(`UPDATE "${schema}"."MenuItem" SET "photoUrl"=$1`,['/brand/romina-kitchen.webp']);
+  await page.locator('select[name="recommendedItemIds"]').selectOption({label:'Test pasta'});
+  await page.getByRole('button',{name:'Save guest experience',exact:true}).click();
+  await page.getByText('Guest experience saved.',{exact:true}).waitFor();
+  const discoveryAccount=await (await context.request.get(`${base}/api/restaurants`)).json();
+  const discoveryRestaurant=discoveryAccount.restaurants[0].id;
+  const discoveryOverview=await (await context.request.get(`${base}/api/workspace/${discoveryRestaurant}/overview`)).json();
+  const discoveryDish=discoveryOverview.menus.flatMap(menu=>menu.categories.flatMap(category=>category.items))[0];
+  const eventResult=await context.request.post(`${base}/api/workspace/${discoveryRestaurant}/guest-content`,{headers:{origin:base},data:{heroUrl:'',recommendedItemIds:[discoveryDish.id],events:[{id:randomUUID(),title:'Live music evening',description:'Join us for music and good food.',posterUrl:'https://images.example.test/event.webp',active:true,startsAt:'',endsAt:''},{id:randomUUID(),title:'Expired event',description:'Hidden',posterUrl:'https://images.example.test/event.webp',active:true,startsAt:'',endsAt:'2020-01-01T00:00:00Z'}]}});
+  assert.equal(eventResult.status(),200);
   await page.getByRole('button',{name:'Tables & QR',exact:true}).click();
   await page.getByRole('button',{name:'+ Add table'}).click();
   await page.getByLabel('Table number or name').fill('12');
@@ -118,10 +129,20 @@ try {
   await page.getByRole('button',{name:'Create QR',exact:true}).click();
   const menuUrl = await page.getByRole('link',{name:'Open menu'}).getAttribute('href');
   const guestContext=await browser.newContext();
+  await guestContext.route('https://images.example.test/**',route=>route.fulfill({path:'public/brand/romina-kitchen.webp',contentType:'image/webp'}));
   const menuPage = await guestContext.newPage();
   menuPage.on('pageerror',error=>errors.push(error.message));
   await menuPage.setViewportSize({width:390,height:844});
   await menuPage.goto(`${base}${menuUrl}`);
+  await menuPage.screenshot({path:'.local/previews/guest-welcome-mobile.png'});
+  await openActions(menuPage);
+  await menuPage.getByRole('navigation',{name:'Table actions'}).getByRole('button',{name:'Call waiter',exact:true}).waitFor();
+  await menuPage.getByRole('button',{name:'View Menu',exact:true}).click();
+  await menuPage.getByRole('heading',{name:'Daily recommendations',exact:true}).waitFor();
+  await menuPage.getByRole('heading',{name:'Live music evening',exact:true}).waitFor();
+  assert.equal(await menuPage.getByText('Expired event',{exact:true}).count(),0);
+  await menuPage.screenshot({path:'.local/previews/guest-discovery-mobile.png',fullPage:true});
+  await menuPage.locator('.rg-parent-card').filter({hasText:'Mains'}).click();
   await menuPage.getByRole('heading',{name:'Test pasta'}).waitFor();
   await menuPage.getByRole('navigation',{name:'Menu categories'}).getByRole('button',{name:'Mains',exact:true}).click();
   await menuPage.getByRole('navigation',{name:'Child categories'}).getByRole('button',{name:'Stews',exact:true}).click();
@@ -137,11 +158,17 @@ try {
   await menuPage.getByRole('link',{name:/View Main menu/}).waitFor();
   await menuPage.locator('.rm-dish-photo').scrollIntoViewIfNeeded();
   assert.equal(await menuPage.locator('.rm-dish-photo').evaluate(async image=>{await image.decode();return image.naturalWidth>0;}),true);
+  await context.request.post(`${base}/api/workspace/${discoveryRestaurant}/guest-content`,{headers:{origin:base},data:{heroUrl:'',recommendedItemIds:[discoveryDish.id],events:[]}});
   const guestPage=await guestContext.newPage();await guestPage.goto(`${base}/menu`);
+  await guestPage.getByRole('button',{name:'View Menu',exact:true}).click();
+  assert.equal(await guestPage.getByRole('region',{name:'Events',exact:true}).count(),0);
+  assert.equal(await guestPage.getByRole('navigation',{name:'Table actions'}).getByRole('button',{name:'Call waiter',exact:true}).count(),0);
   await guestPage.getByRole('heading',{name:'Test pasta'}).waitFor();
   await guestPage.getByRole('searchbox',{name:'Search the menu'}).fill('missing dish');
   await guestPage.getByRole('heading',{name:'No matching dishes.'}).waitFor();
-  await guestPage.getByRole('navigation',{name:'Table actions'}).getByRole('button',{name:'Ask for bill',exact:true}).click();
+  await openActions(guestPage);
+  await guestPage.getByRole('navigation',{name:'Table actions'}).getByRole('button',{name:'More help',exact:true}).click();
+  await guestPage.getByRole('button',{name:/Ask for bill/}).click();
   await guestPage.getByRole('heading',{name:'Join us at the table',exact:true}).waitFor();
   await guestPage.getByRole('button',{name:'Close',exact:true}).click();
   const home=await context.newPage();await home.goto(base);await home.getByRole('heading',{name:/There’s always/}).waitFor();
@@ -164,7 +191,12 @@ try {
   await printPage.goto(`${base}${await page.getByRole('link',{name:'Print card'}).getAttribute('href')}`);
   await printPage.getByRole('heading',{name:'Table 12',exact:true}).waitFor();
   await printPage.screenshot({path:'.local/previews/qr-print.png',fullPage:true});
-  await menuPage.getByRole('button',{name:'Add Test pasta to order',exact:true}).click();
+  await menuPage.getByRole('button',{name:'View Test pasta',exact:true}).click();
+  await menuPage.getByRole('button',{name:'Increase dish quantity'}).click();
+  await menuPage.getByRole('button',{name:'Decrease dish quantity'}).click();
+  await menuPage.getByLabel('Special instructions').fill('Less salt.');
+  await menuPage.screenshot({path:'.local/previews/guest-detail-mobile.png'});
+  await menuPage.getByRole('button',{name:/Add to cart/}).click();
   await menuPage.getByRole('button',{name:/View your order/}).click();
   await menuPage.getByRole('button',{name:'Place order',exact:true}).waitFor({state:'visible'});
   await menuPage.getByRole('textbox').fill('No chilli, please.');
@@ -181,19 +213,22 @@ try {
   await menuPage.getByRole('heading',{name:'Sent to the restaurant',exact:true}).waitFor();
   await menuPage.screenshot({path:'.local/previews/guest-order-confirmation.png',fullPage:true});
   await menuPage.getByRole('button',{name:'Close',exact:true}).click();
+  await openActions(menuPage);
   await menuPage.getByRole('navigation',{name:'Table actions'}).getByRole('button',{name:'Call waiter',exact:true}).click();
   await menuPage.getByRole('heading',{name:'Request sent',exact:true}).waitFor();
   await menuPage.getByRole('button',{name:'Close',exact:true}).click();
+  await openActions(menuPage);
   await menuPage.getByRole('navigation',{name:'Table actions'}).getByRole('button',{name:'Ask for bill',exact:true}).click();
   await menuPage.getByRole('heading',{name:'Request sent',exact:true}).waitFor();
   await menuPage.getByRole('button',{name:'Close',exact:true}).click();
   const queue=await (await context.request.get(`${base}/api/workspace/${restaurantId}/operations`)).json();
   assert.equal(queue.orders.length,1);assert.equal(Number(queue.orders[0].total),375.00);
-  assert.equal(queue.orders[0].notes,'No chilli, please.');
+  assert.equal(queue.orders[0].notes,'No chilli, please.\nTest pasta: Less salt.');
   assert.ok(queue.requests.some(r=>r.type==='WAITER'));assert.ok(queue.requests.some(r=>r.type==='BILL'));
   const accepted=await context.request.patch(`${base}/api/workspace/${restaurantId}/operations`,{headers:{origin:base},data:{kind:'order',id:queue.orders[0].id,status:'ACCEPTED'}});
   assert.equal(accepted.status(),200);
   await menuPage.reload();
+  await menuPage.getByRole('button',{name:'View Menu',exact:true}).click();
   await menuPage.getByText('Your order is accepted',{exact:true}).waitFor();
   await page.getByRole('button',{name:'Live service',exact:true}).click();
   await page.getByRole('heading',{name:'Incoming orders',exact:false}).waitFor();

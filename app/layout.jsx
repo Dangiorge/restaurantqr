@@ -1,10 +1,17 @@
 import '@fontsource/poppins/400.css';
 import '@fontsource/poppins/600.css';
 import '@fontsource/poppins/700.css';
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/600.css';
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/500.css';
+import '@fontsource/manrope/600.css';
 import "./globals.css";
 import './romina.css';
 import './guest-menu.css';
 import './brand-intro.css';
+import './guest-discovery.css';
+import './guest-actions.css';
 
 export const metadata = {
   title: "Tableline · Restaurant workspace",

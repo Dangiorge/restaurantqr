@@ -6,7 +6,7 @@ export async function publicRestaurant(db,slug) {
   if(typeof slug!=='string'||!slug||slug.length>80)return null;
   return db.restaurant.findFirst({where:{slug,status:'ACTIVE'},select:{
     name:true,slug:true,description:true,address:true,phone:true,logoUrl:true,primaryColor:true,
-    settings:{select:{currency:true,taxRate:true,serviceChargeRate:true}},
+    settings:{select:{currency:true,taxRate:true,serviceChargeRate:true,guestContent:true}},
     branches:{where:{active:true},select:{name:true,address:true,phone:true,timezone:true,openingHours:true},orderBy:{name:'asc'}},
     menus:{where:{active:true},select:publicMenuSelect},
   }});

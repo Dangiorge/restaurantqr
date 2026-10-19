@@ -1,5 +1,10 @@
 export default function MenuIcon({name,size=22,...props}){
   const paths={
+    more:<><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></>,
+    back:<path d="M19 12H5m6-6-6 6 6 6"/>,
+    home:<><path d="m3 11 9-8 9 8M5 10v11h14V10M10 21v-7h4v7"/></>,
+    pause:<><path d="M8 5v14M16 5v14"/></>,
+    play:<path d="m8 4 12 8-12 8V4Z"/>,
     menu:<><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>,
     cart:<><path d="M3 4h2l2.4 11h11.3l2-8H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></>,
     bell:<><path d="M4 17h16M6 17v-6a6 6 0 0 1 12 0v6M10 21h4M12 3V2"/></>,

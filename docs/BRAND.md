@@ -16,6 +16,8 @@ The original stacked primary logo is available as `public/brand/romina-logo.svg`
 
 Poppins is hosted locally from the fontsource package, so builds do not require Google Fonts. Nokia Pure files and a license were not supplied, so it has not been bundled or misrepresented as installed. Ethiopian text currently uses system fallback fonts. An approved font asset/license is needed for exact Ethiopian typography.
 
+At the user's request, the guest experience uses locally hosted Cormorant Garamond for display headings and Manrope for body text and controls. The workspace retains Poppins. The original vector logo remains unchanged and transparent; the welcome screen removes its white panel and adds a soft, fading white halo behind the artwork for legibility. A red More disclosure at the lower right expands left to reveal table actions, with keyboard dismissal and reduced-motion support.
+
 Select the Romina Restaurants brand profile during onboarding to apply the documented red and supplied logo. Other restaurant tenants start neutral and can configure their own logo and primary color in settings. The administration interface has a separate neutral green/slate design system. Restaurant branding does not change authorization or platform administration.
 
 No invented menu records have been added to the development database. Staff can now upload dish/logo images and PDF/image menu documents through authenticated Cloudinary endpoints. The home page uses place-setting and food photography extracted from supplied PDF pages 25 and 24 respectively. Historical example prices in the brand book are not treated as current menu prices. The physical printed QR code must be tested with real devices at its final print size before operational use.

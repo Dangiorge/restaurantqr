@@ -98,6 +98,7 @@ model RestaurantSettings {
   timezone String @default("Africa/Addis_Ababa")
   taxRate Decimal @default(0) @db.Decimal(5,2)
   serviceChargeRate Decimal @default(0) @db.Decimal(5,2)
+  guestContent Json @default("{}")
   updatedAt DateTime @updatedAt
 }
 

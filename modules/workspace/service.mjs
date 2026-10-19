@@ -106,6 +106,15 @@ async function validateAssignment(tx, ctx, data) {
 
 async function special(db, user, restaurantId, resource, input, recordId) {
   return db.$transaction(async tx => {
+    if(resource==='guest-content'){
+      const ctx=await context(tx,user,restaurantId,'menu.edit');tenantWide(ctx);
+      const data=v.guestContentInput.parse(input);
+      const count=await tx.menuItem.count({where:{restaurantId,id:{in:data.recommendedItemIds}}});
+      if(count!==data.recommendedItemIds.length)throw new HttpError(400,'Choose recommendations from this restaurant’s dishes.');
+      await tx.restaurantSettings.update({where:{restaurantId},data:{guestContent:data}});
+      await audit(tx,ctx,'guest-content.updated',restaurantId);
+      return {id:restaurantId};
+    }
     if (resource === 'settings') {
       const ctx = await context(tx, user, restaurantId, 'restaurant.manage'); tenantWide(ctx);
       const { currency, timezone, taxRate, serviceChargeRate, ...profile } = v.settingsInput.parse(input);
@@ -191,7 +200,7 @@ export async function acceptInvitation(db, user, raw) {
 
 export async function resolveQr(db, raw) {
   if (!/^[A-Za-z0-9_-]{43}$/.test(raw)) return null;
-  const qr = await db.qrCode.findFirst({ where: { token: raw, revokedAt: null, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }], table: { active: true, branch: { active: true, restaurant: { status: 'ACTIVE' } } } }, select: { table: { select: { name: true, branch: { select: { name: true, restaurant: { select: { id: true, slug: true, name: true, description: true, logoUrl: true, primaryColor: true, settings: { select: { currency: true, taxRate: true, serviceChargeRate: true } } } } } } } } } });
+  const qr = await db.qrCode.findFirst({ where: { token: raw, revokedAt: null, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }], table: { active: true, branch: { active: true, restaurant: { status: 'ACTIVE' } } } }, select: { table: { select: { name: true, branch: { select: { name: true, restaurant: { select: { id: true, slug: true, name: true, description: true, logoUrl: true, primaryColor: true, settings: { select: { currency: true, taxRate: true, serviceChargeRate: true, guestContent:true } } } } } } } } } });
   if (!qr) return null;
   const restaurant = qr.table.branch.restaurant;
   const menus = await db.menu.findMany({ where: { restaurantId: restaurant.id, active: true }, select:publicMenuSelect });

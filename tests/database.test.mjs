@@ -18,7 +18,7 @@ test('Phase 1 disposable PostgreSQL schema integration', { skip: !process.env.DA
   assert.equal(fingerprint, manifest.fingerprint, 'Use the verified development database only');
   const schema = `qrmenu_test_${randomUUID().replaceAll('-', '')}`;
   const admin = new pg.Client({ connectionString: process.env.DATABASE_URL });
-  const sql = readFileSync('prisma/migrations/20261019090000_phase_one/migration.sql', 'utf8') + '\n' + readFileSync('prisma/migrations/20261019110000_menu_document/migration.sql', 'utf8')+'\n'+readFileSync('prisma/migrations/20261019140000_guest_ordering/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019170000_menu_taxonomy/migration.sql','utf8');
+  const sql = readFileSync('prisma/migrations/20261019090000_phase_one/migration.sql', 'utf8') + '\n' + readFileSync('prisma/migrations/20261019110000_menu_document/migration.sql', 'utf8')+'\n'+readFileSync('prisma/migrations/20261019140000_guest_ordering/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019170000_menu_taxonomy/migration.sql','utf8')+'\n'+readFileSync('prisma/migrations/20261019190000_guest_discovery/migration.sql','utf8');
   assert.doesNotMatch(sql, /^\s*(DROP|TRUNCATE|DELETE|UPDATE)\b/im);
   let db;
   await admin.connect();
