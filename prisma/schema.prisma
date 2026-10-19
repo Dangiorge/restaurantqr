@@ -1,0 +1,376 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id String @id
+  name String
+  email String @unique
+  emailVerified Boolean @default(false)
+  image String?
+  status String @default("ACTIVE")
+  platformAdmin Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions Session[]
+  accounts Account[]
+  memberships Membership[]
+}
+
+model Session {
+  id String @id
+  expiresAt DateTime
+  token String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model Account {
+  id String @id
+  accountId String
+  providerId String
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Verification {
+  id String @id
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([identifier])
+}
+
+model RateLimit {
+  id String @id
+  key String @unique
+  count Int
+  lastRequest BigInt
+}
+
+model Restaurant {
+  id String @id @default(cuid())
+  name String
+  slug String @unique
+  description String @default("")
+  address String @default("")
+  phone String @default("")
+  logoUrl String @default("")
+  primaryColor String @default("#171717")
+  status String @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  settings RestaurantSettings?
+  memberships Membership[]
+  roles Role[]
+  branches Branch[]
+  menus Menu[]
+  invitations Invitation[]
+  audits AuditLog[]
+}
+
+model RestaurantSettings {
+  restaurantId String @id
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  currency String @default("ETB")
+  timezone String @default("Africa/Addis_Ababa")
+  taxRate Decimal @default(0) @db.Decimal(5,2)
+  serviceChargeRate Decimal @default(0) @db.Decimal(5,2)
+  updatedAt DateTime @updatedAt
+}
+
+model Permission {
+  key String @id
+  roles RolePermission[]
+}
+
+model Role {
+  id String @id @default(cuid())
+  restaurantId String
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  name String
+  isOwner Boolean @default(false)
+  permissions RolePermission[]
+  memberships Membership[]
+  invitations Invitation[]
+  createdAt DateTime @default(now())
+  @@unique([restaurantId, name])
+  @@unique([restaurantId, id])
+}
+
+model RolePermission {
+  roleId String
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionKey String
+  permission Permission @relation(fields: [permissionKey], references: [key])
+  @@id([roleId, permissionKey])
+}
+
+model Membership {
+  id String @id @default(cuid())
+  restaurantId String
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  roleId String
+  role Role @relation(fields: [restaurantId, roleId], references: [restaurantId, id])
+  allBranches Boolean @default(false)
+  status String @default("ACTIVE")
+  branches MembershipBranch[]
+  createdAt DateTime @default(now())
+  @@unique([restaurantId, userId])
+  @@unique([restaurantId, id])
+  @@index([userId])
+}
+
+model Branch {
+  id String @id @default(cuid())
+  restaurantId String
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  name String
+  address String @default("")
+  phone String @default("")
+  timezone String @default("Africa/Addis_Ababa")
+  openingHours Json @default("{}")
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  members MembershipBranch[]
+  areas DiningArea[]
+  tables DiningTable[]
+  @@unique([restaurantId, id])
+  @@unique([restaurantId, name])
+}
+
+model MembershipBranch {
+  restaurantId String
+  membershipId String
+  branchId String
+  membership Membership @relation(fields: [restaurantId, membershipId], references: [restaurantId, id], onDelete: Cascade)
+  branch Branch @relation(fields: [restaurantId, branchId], references: [restaurantId, id])
+  @@id([membershipId, branchId])
+}
+
+model Invitation {
+  id String @id @default(cuid())
+  restaurantId String
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  email String
+  roleId String
+  role Role @relation(fields: [restaurantId, roleId], references: [restaurantId, id])
+  branchIds String[]
+  allBranches Boolean @default(false)
+  tokenHash String @unique
+  expiresAt DateTime
+  acceptedAt DateTime?
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([restaurantId, email])
+}
+
+model DiningArea {
+  id String @id @default(cuid())
+  restaurantId String
+  branchId String
+  branch Branch @relation(fields: [restaurantId, branchId], references: [restaurantId, id])
+  name String
+  tables DiningTable[]
+  @@unique([restaurantId, branchId, id])
+  @@unique([branchId, name])
+}
+
+model DiningTable {
+  id String @id @default(cuid())
+  restaurantId String
+  branchId String
+  branch Branch @relation(fields: [restaurantId, branchId], references: [restaurantId, id])
+  areaId String?
+  area DiningArea? @relation(fields: [restaurantId, branchId, areaId], references: [restaurantId, branchId, id])
+  name String
+  active Boolean @default(true)
+  qrCodes QrCode[]
+  orders Order[]
+  serviceRequests ServiceRequest[]
+  createdAt DateTime @default(now())
+  @@unique([restaurantId, id])
+  @@unique([restaurantId, branchId, id])
+  @@unique([branchId, name])
+}
+
+model QrCode {
+  id String @id @default(cuid())
+  restaurantId String
+  tableId String
+  table DiningTable @relation(fields: [restaurantId, tableId], references: [restaurantId, id])
+  token String @unique
+  revokedAt DateTime?
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  orders Order[]
+  serviceRequests ServiceRequest[]
+  @@unique([restaurantId, tableId, id])
+  @@index([restaurantId, tableId])
+}
+
+model Menu {
+  id String @id @default(cuid())
+  restaurantId String
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  name String
+  documentUrl String @default("")
+  active Boolean @default(true)
+  categories MenuCategory[]
+  @@unique([restaurantId, id])
+  @@unique([restaurantId, name])
+}
+
+model MenuCategory {
+  id String @id @default(cuid())
+  restaurantId String
+  menuId String
+  menu Menu @relation(fields: [restaurantId, menuId], references: [restaurantId, id])
+  name String
+  displayOrder Int @default(0)
+  active Boolean @default(true)
+  items MenuItem[]
+  @@unique([restaurantId, id])
+  @@unique([menuId, name])
+}
+
+model MenuItem {
+  id String @id @default(cuid())
+  restaurantId String
+  categoryId String
+  category MenuCategory @relation(fields: [restaurantId, categoryId], references: [restaurantId, id])
+  name String
+  description String @default("")
+  photoUrl String @default("")
+  basePrice Decimal @db.Decimal(12,2)
+  active Boolean @default(true)
+  available Boolean @default(true)
+  dietaryLabels String[]
+  allergens String[]
+  displayOrder Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([restaurantId, categoryId, displayOrder])
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+  restaurantId String
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+  actorId String
+  action String
+  entityId String
+  details Json @default("{}")
+  createdAt DateTime @default(now())
+  @@index([restaurantId, createdAt])
+}
+
+enum OrderStatus {
+  PLACED
+  ACCEPTED
+  PREPARING
+  READY
+  SERVED
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceRequestType {
+  WAITER
+  BILL
+  WATER
+  CUTLERY
+  HELP
+}
+
+enum ServiceRequestStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+model Order {
+  id String @id @default(cuid())
+  restaurantId String
+  branchId String
+  tableId String
+  table DiningTable @relation(fields: [restaurantId, branchId, tableId], references: [restaurantId, branchId, id])
+  qrCodeId String
+  qr QrCode @relation(fields: [restaurantId, tableId, qrCodeId], references: [restaurantId, tableId, id])
+  requestKey String
+  payloadHash String
+  publicToken String @unique
+  publicExpiresAt DateTime
+  status OrderStatus @default(PLACED)
+  notes String @default("")
+  currency String @default("ETB")
+  subtotal Decimal @db.Decimal(16,2)
+  taxRate Decimal @db.Decimal(5,2)
+  serviceChargeRate Decimal @db.Decimal(5,2)
+  taxAmount Decimal @db.Decimal(16,2)
+  serviceAmount Decimal @db.Decimal(16,2)
+  total Decimal @db.Decimal(16,2)
+  items OrderItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([qrCodeId, requestKey])
+  @@unique([restaurantId, id])
+  @@index([restaurantId, branchId, status, createdAt])
+}
+
+model OrderItem {
+  id String @id @default(cuid())
+  restaurantId String
+  orderId String
+  order Order @relation(fields: [restaurantId, orderId], references: [restaurantId, id])
+  menuItemId String
+  name String
+  quantity Int
+  unitPrice Decimal @db.Decimal(12,2)
+  lineTotal Decimal @db.Decimal(16,2)
+  @@index([restaurantId, orderId])
+}
+
+model ServiceRequest {
+  id String @id @default(cuid())
+  restaurantId String
+  branchId String
+  tableId String
+  table DiningTable @relation(fields: [restaurantId, branchId, tableId], references: [restaurantId, branchId, id])
+  qrCodeId String
+  qr QrCode @relation(fields: [restaurantId, tableId, qrCodeId], references: [restaurantId, tableId, id])
+  requestKey String
+  publicToken String @unique
+  publicExpiresAt DateTime
+  type ServiceRequestType
+  status ServiceRequestStatus @default(OPEN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([qrCodeId, requestKey])
+  @@index([restaurantId, branchId, status, createdAt])
+}

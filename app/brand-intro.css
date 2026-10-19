@@ -1,0 +1,10 @@
+.romina-intro{display:none;position:fixed;inset:0;z-index:1000;background:#fff;place-items:center;pointer-events:none}
+.romina-intro[data-play="true"]{display:grid;animation:romina-intro-away .3s ease 1s both}
+.romina-intro-mark{display:grid;justify-items:center;gap:38px;padding:70px;animation:romina-mark-in .65s cubic-bezier(.2,.7,.2,1) both}
+.romina-intro-mark img{display:block;width:min(240px,55vw);height:auto}
+.romina-intro-line{display:block;width:56px;height:3px;background:#D42028;transform-origin:left;animation:romina-line-in .7s ease .15s both}
+@keyframes romina-mark-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes romina-line-in{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes romina-intro-away{to{opacity:0;visibility:hidden}}
+@media(prefers-reduced-motion:reduce){.romina-intro[data-play="true"]{display:none}}
+@media print{.romina-intro[data-play="true"]{display:none}}
