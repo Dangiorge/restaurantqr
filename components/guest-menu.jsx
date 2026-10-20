@@ -3,6 +3,8 @@
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import Image from 'next/image';
 import useLogoFlight from './use-logo-flight';
+import MenuBackdrop from './menu-backdrop';
+import {appearanceVariables,menuAppearance,menuBackground} from '@/modules/menus/appearance.mjs';
 import GuestDishDetail from './guest-dish-detail';
 import GuestActions from './guest-actions';
 import {GuestWelcome,RecommendationSlider,GuestEvents,ParentCategories} from './guest-discovery';
@@ -71,6 +73,9 @@ export default function GuestMenu({restaurant,menus,branch,table,token,romina=fa
   const documents=menus.filter(m=>m.documentUrl);
   const discovery=useMemo(()=>guestDiscovery(restaurant.settings?.guestContent,dishes,scheduleNow),[restaurant.settings?.guestContent,dishes,scheduleNow]);
   const heroPhoto=discovery.heroUrl||(romina?'/brand/romina-kitchen.webp':dishes.find(i=>i.photoUrl)?.photoUrl);
+  const appearance=menuAppearance(restaurant.settings?.guestContent?.appearance);
+  const glass=screen!=='welcome'&&appearance.style==='glass';
+  const backdrop=menuBackground(appearance,discovery.heroUrl,romina?'/brand/romina-kitchen.webp':dishes.find(i=>i.photoUrl)?.photoUrl);
   const logo=romina?'/brand/romina-emblem.svg':brandLogoUrl(restaurant.logoUrl);
   const lines=useMemo(()=>dishes.filter(i=>cart[i.id]>0).map(i=>({itemId:i.id,quantity:cart[i.id]})),[dishes,cart]);
   const cartKey=JSON.stringify(lines);
@@ -170,7 +175,8 @@ export default function GuestMenu({restaurant,menus,branch,table,token,romina=fa
   }
   function openDish(dish){setSelected(dish);setView('dish');}
   const listing=screen==='items'||Boolean(search.trim());
-  return <main className={`rm-menu rg-experience ${screen==='welcome'?'rg-stage-welcome':''}`} style={{'--rm-red':color}}>
+  return <main className={`rm-menu rg-experience ${screen==='welcome'?'rg-stage-welcome':''} ${glass?'rg-glass':''}`} style={{'--rm-red':color,...appearanceVariables(appearance)}}>
+    {glass&&<MenuBackdrop src={backdrop} motion={appearance.motion}/>}
     {screen==='welcome'?<GuestWelcome logoRef={welcomeLogo} name={restaurant.name} logo={logo} hero={heroPhoto} table={table} branch={branch} enter={()=>navigate('menu')}/>:<>
       <header className="rm-header rg-header"><button className="rm-icon-button" aria-label={screen==='items'?'Back to categories':'Back to welcome'} onClick={()=>navigate(screen==='items'?'menu':'welcome')}><MenuIcon name="back"/></button><button ref={headerLogo} className="rg-header-logo" onClick={()=>navigate('menu')} aria-label="Menu home">{logo?<Image className="rm-brand-logo" src={logo} alt={restaurant.name} width={64} height={64} unoptimized priority/>:null}<span className="rg-brand-title"><strong>{restaurant.name}</strong><small>Good food. Great company.</small></span></button><button className="rm-header-cart rm-icon-button" onClick={()=>setView('cart')} aria-label={`Open cart, ${count} items`}><MenuIcon name="cart"/>{count>0&&<span>{count}</span>}</button></header>
       <div className="rm-main rg-main">{table&&<p className="rg-table-context"><MenuIcon name="pin" size={14}/>{branch} &middot; Table {table}</p>}

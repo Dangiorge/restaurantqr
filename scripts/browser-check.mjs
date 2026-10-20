@@ -112,6 +112,9 @@ try {
   await page.getByRole('cell',{name:'350.50 ETB'}).waitFor();
   await page.getByRole('combobox',{name:'Filter dishes by dietary type'}).selectOption('all');
   if(guestOnly)await fixtureQuery(`UPDATE "${schema}"."MenuItem" SET "photoUrl"=$1`,['/brand/romina-kitchen.webp']);
+  await page.getByRole('button',{name:'System & appearance',exact:true}).click();
+  await page.getByRole('heading',{name:'Menu appearance',exact:true}).waitFor();
+  let customBackground='';
   if(guestOnly){
     let backgroundUploads=0;
     await page.route('**/api/workspace/*/uploads?kind=dish',route=>{backgroundUploads++;return route.fulfill({json:{url:`https://images.example.test/background-${backgroundUploads}.webp`,publicId:`test/background-${backgroundUploads}`,contentType:'image/webp'}});});
@@ -120,7 +123,21 @@ try {
     await page.waitForFunction(()=>document.querySelector('.background-bulk-upload input')?.disabled===false);
     assert.equal(backgroundUploads,2);
     await page.locator('.background-card').first().getByLabel('Priority',{exact:true}).fill('1');
-    await page.screenshot({path:'.local/previews/background-library.png',fullPage:true});
+    await page.getByLabel('Upload menu background',{exact:true}).setInputFiles('public/brand/romina-table.webp');
+    await page.getByRole('button',{name:'Save appearance',exact:true}).waitFor({state:'visible'});
+    await page.waitForFunction(()=>document.querySelector('input[name="backgroundUrl"]')?.value.includes('background-3'));
+    customBackground='https://images.example.test/background-3.webp';
+    assert.equal(await page.getByRole('combobox',{name:'Menu background source'}).inputValue(),'custom');
+    await page.getByRole('slider',{name:'Glass opacity'}).fill('70');
+    await page.getByRole('slider',{name:'Background brightness'}).fill('55');
+    await page.getByLabel('Gentle background movement',{exact:true}).uncheck();
+    await page.getByRole('button',{name:'Save appearance',exact:true}).click();
+    await page.getByText('Appearance saved. Open the guest menu to see your design.',{exact:true}).waitFor();
+    await page.screenshot({path:'.local/previews/system-appearance.png',fullPage:true});
+    await page.setViewportSize({width:390,height:844});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Appearance workspace fits mobile');
+    await page.screenshot({path:'.local/previews/system-appearance-mobile.png',fullPage:true});
+    await page.setViewportSize({width:1440,height:1000});
   }
   await page.locator('select[name="recommendedItemIds"]').selectOption({label:'Test pasta'});
   await page.getByRole('button',{name:'Save guest experience',exact:true}).click();
@@ -131,6 +148,7 @@ try {
   const discoveryDish=discoveryOverview.menus.flatMap(menu=>menu.categories.flatMap(category=>category.items))[0];
   const gallery=discoveryOverview.restaurant.settings.guestContent.backgrounds||[];
   assert.equal(gallery.length,guestOnly?2:0);
+  if(guestOnly){assert.equal(discoveryOverview.restaurant.settings.guestContent.appearance.backgroundUrl,customBackground);assert.equal(discoveryOverview.restaurant.settings.guestContent.appearance.motion,false);}
   const liveEventId=randomUUID();
   const eventBackgrounds=gallery.map((image,index)=>({...image,priority:index===1?10:1,eventId:index===1?liveEventId:null}));
   const eventResult=await context.request.post(`${base}/api/workspace/${discoveryRestaurant}/guest-content`,{headers:{origin:base},data:{heroUrl:'',backgrounds:eventBackgrounds,recommendedItemIds:[discoveryDish.id],events:[{id:liveEventId,title:'Live music evening',description:'Join us for music and good food.',posterUrl:'https://images.example.test/event.webp',active:true,startsAt:'',endsAt:''},{id:randomUUID(),title:'Expired event',description:'Hidden',posterUrl:'https://images.example.test/event.webp',active:true,startsAt:'',endsAt:'2020-01-01T00:00:00Z'}]}});
@@ -155,6 +173,14 @@ try {
   await menuPage.getByRole('navigation',{name:'Table actions'}).getByRole('button',{name:'Call waiter',exact:true}).waitFor();
   await menuPage.getByRole('button',{name:'View Menu',exact:true}).click();
   await menuPage.getByRole('heading',{name:'Daily recommendations',exact:true}).waitFor();
+  assert.equal(await menuPage.locator('.rg-glass').count(),1);
+  if(guestOnly){
+    assert.equal(await menuPage.locator('.rg-menu-backdrop>img').getAttribute('src'),customBackground);
+    assert.equal(await menuPage.locator('.rg-menu-backdrop>img').evaluate(image=>getComputedStyle(image).animationName),'none');
+    assert.equal(await menuPage.locator('.rg-experience').evaluate(node=>getComputedStyle(node).getPropertyValue('--rg-panel')),'0.7');
+  }
+  for(const width of [320,390,768,1440]){await menuPage.setViewportSize({width,height:900});assert.equal(await menuPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`Glass menu fits ${width}px`);}
+  await menuPage.setViewportSize({width:390,height:844});
   await menuPage.getByRole('heading',{name:'Live music evening',exact:true}).waitFor();
   assert.equal(await menuPage.getByText('Expired event',{exact:true}).count(),0);
   await menuPage.screenshot({path:'.local/previews/guest-discovery-mobile.png',fullPage:true});
@@ -175,9 +201,11 @@ try {
   await menuPage.locator('.rm-dish-photo').scrollIntoViewIfNeeded();
   assert.equal(await menuPage.locator('.rm-dish-photo').evaluate(async image=>{await image.decode();return image.naturalWidth>0;}),true);
   await context.request.post(`${base}/api/workspace/${discoveryRestaurant}/guest-content`,{headers:{origin:base},data:{heroUrl:'',backgrounds:gallery.slice(0,1),recommendedItemIds:[discoveryDish.id],events:[]}});
+  if(guestOnly){const changed=await context.request.post(`${base}/api/workspace/${discoveryRestaurant}/appearance`,{headers:{origin:base},data:{style:'classic'}});assert.equal(changed.status(),200);}
   const guestPage=await guestContext.newPage();await guestPage.goto(`${base}/menu`);
   if(guestOnly)assert.match(await guestPage.locator('.rg-welcome-image').getAttribute('src'),/background-1/);
   await guestPage.getByRole('button',{name:'View Menu',exact:true}).click();
+  if(guestOnly)assert.equal(await guestPage.locator('.rg-menu-backdrop').count(),0,'Classic white omits the photo backdrop');
   assert.equal(await guestPage.getByRole('region',{name:'Events',exact:true}).count(),0);
   assert.equal(await guestPage.getByRole('navigation',{name:'Table actions'}).getByRole('button',{name:'Call waiter',exact:true}).count(),0);
   await guestPage.getByRole('heading',{name:'Test pasta'}).waitFor();

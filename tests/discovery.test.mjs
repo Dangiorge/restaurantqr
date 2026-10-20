@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {guestDiscovery,orderInstructions,nextDiscoveryChange} from '../modules/menus/discovery.mjs';
-import {guestContentInput} from '../modules/validation.mjs';
+import {guestContentInput,appearanceInput} from '../modules/validation.mjs';
+import {menuAppearance,menuBackground} from '../modules/menus/appearance.mjs';
 import {mutate} from '../modules/workspace/service.mjs';
 
 test('discovery skips unavailable recommendations and draft, future or expired events',()=>{
@@ -49,10 +50,32 @@ test('background validation rejects reversed schedules, unlinked events and dupl
 test('publishing discovery content requires restaurant-wide edit permission and rejects foreign dishes',async()=>{
   const user={id:'user',status:'ACTIVE'};
   let saved=false;
-  const tx={membership:{findUnique:async()=>({status:'ACTIVE',restaurant:{status:'ACTIVE'},allBranches:true,branches:[],role:{permissions:[{permissionKey:'menu.edit'}]}})},menuItem:{count:async()=>0},restaurantSettings:{update:async()=>{saved=true;}},auditLog:{create:async()=>({})}};
+  const tx={$executeRaw:async()=>{},membership:{findUnique:async()=>({status:'ACTIVE',restaurant:{status:'ACTIVE'},allBranches:true,branches:[],role:{permissions:[{permissionKey:'menu.edit'}]}})},menuItem:{count:async()=>0},restaurantSettings:{findUnique:async()=>({guestContent:{}}),update:async()=>{saved=true;}},auditLog:{create:async()=>({})}};
   const db={$transaction:callback=>callback(tx)};
   await assert.rejects(mutate(db,user,'restaurant','guest-content',{recommendedItemIds:['foreign']}),error=>error.status===400);assert.equal(saved,false);
   await mutate(db,user,'restaurant','guest-content',{});assert.equal(saved,true);
   tx.membership.findUnique=async()=>null;
   await assert.rejects(mutate(db,user,'other','guest-content',{}),error=>error.status===403);
+});
+
+test('appearance rejects unsafe backgrounds and unreadable glass settings; chooses scheduled or separate images',()=>{
+  for(const input of [{backgroundUrl:'javascript:alert(1)'},{panelOpacity:1},{overlay:99},{blur:100},{motion:'yes'},{style:'unknown'}])assert.equal(appearanceInput.safeParse(input).success,false);
+  assert.equal(menuAppearance().style,'glass');
+  assert.equal(menuBackground(menuAppearance(),'scheduled','fallback'),'scheduled');
+  assert.equal(menuBackground(menuAppearance({useWelcomeBackground:false,backgroundUrl:'custom'}),'scheduled','fallback'),'custom');
+  assert.equal(menuBackground(menuAppearance({useWelcomeBackground:false}),'scheduled','fallback'),'fallback');
+});
+
+test('appearance and content saves preserve each other, and reject branch-limited or unauthorized edits',async()=>{
+  const user={id:'user',status:'ACTIVE'};
+  let limited=false,allowed=true;
+  let content={heroUrl:'https://example.test/welcome.webp',events:[],backgrounds:[],recommendedItemIds:[]};
+  const tx={$executeRaw:async()=>{},membership:{findUnique:async()=>allowed?{status:'ACTIVE',restaurant:{status:'ACTIVE'},allBranches:!limited,branches:[],role:{permissions:[{permissionKey:'menu.edit'}]}}:null},menuItem:{count:async()=>0},restaurantSettings:{findUnique:async()=>({guestContent:content}),update:async({data})=>{content=data.guestContent;}},auditLog:{create:async()=>({})}};
+  const db={$transaction:callback=>callback(tx)};
+  await mutate(db,user,'restaurant','appearance',{style:'classic',backgroundUrl:'https://example.test/menu.webp'});
+  assert.equal(content.heroUrl,'https://example.test/welcome.webp');assert.equal(content.appearance.style,'classic');
+  await mutate(db,user,'restaurant','guest-content',{heroUrl:'https://example.test/new.webp'});
+  assert.equal(content.appearance.style,'classic');assert.equal(content.appearance.backgroundUrl,'https://example.test/menu.webp');
+  limited=true;await assert.rejects(mutate(db,user,'restaurant','appearance',{}),error=>error.status===403);
+  allowed=false;await assert.rejects(mutate(db,user,'other','appearance',{}),error=>error.status===403);
 });

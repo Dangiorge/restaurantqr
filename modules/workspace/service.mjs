@@ -111,8 +111,20 @@ async function special(db, user, restaurantId, resource, input, recordId) {
       const data=v.guestContentInput.parse(input);
       const count=await tx.menuItem.count({where:{restaurantId,id:{in:data.recommendedItemIds}}});
       if(count!==data.recommendedItemIds.length)throw new HttpError(400,'Choose recommendations from this restaurant’s dishes.');
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`guest-content:${restaurantId}`},0))`;
+      const previous=await tx.restaurantSettings.findUnique({where:{restaurantId},select:{guestContent:true}});
+      data.appearance=data.appearance??previous?.guestContent?.appearance??v.appearanceInput.parse({});
       await tx.restaurantSettings.update({where:{restaurantId},data:{guestContent:data}});
       await audit(tx,ctx,'guest-content.updated',restaurantId);
+      return {id:restaurantId};
+    }
+    if(resource==='appearance'){
+      const ctx=await context(tx,user,restaurantId,'menu.edit');tenantWide(ctx);
+      const appearance=v.appearanceInput.parse(input);
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`guest-content:${restaurantId}`},0))`;
+      const previous=required(await tx.restaurantSettings.findUnique({where:{restaurantId},select:{guestContent:true}}));
+      await tx.restaurantSettings.update({where:{restaurantId},data:{guestContent:{...previous.guestContent,appearance}}});
+      await audit(tx,ctx,'appearance.updated',restaurantId);
       return {id:restaurantId};
     }
     if (resource === 'settings') {
