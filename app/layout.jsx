@@ -13,6 +13,7 @@ import './brand-intro.css';
 import './guest-discovery.css';
 import './guest-actions.css';
 import './guest-appearance.css';
+import './guest-dishes.css';
 
 export const metadata = {
   title: "Tableline · Restaurant workspace",

@@ -237,6 +237,12 @@ try {
   await printPage.getByRole('heading',{name:'Table 12',exact:true}).waitFor();
   await printPage.screenshot({path:'.local/previews/qr-print.png',fullPage:true});
   await menuPage.getByRole('button',{name:'View Test pasta',exact:true}).click();
+  assert.equal(await menuPage.locator('.rg-detail-photo').evaluate(image=>getComputedStyle(image).objectFit),'cover');
+  await menuPage.getByRole('button',{name:'View full photo',exact:true}).click();
+  assert.equal(await menuPage.locator('.rg-detail-photo').evaluate(image=>getComputedStyle(image).objectFit),'contain');
+  await menuPage.getByRole('button',{name:'Fill photo frame',exact:true}).click();
+  const purchaseBounds=await menuPage.getByRole('button',{name:/Add to cart/}).boundingBox();
+  assert.ok(purchaseBounds.y>=0&&purchaseBounds.y+purchaseBounds.height<=844,'Detail purchase action stays on screen');
   await menuPage.getByRole('button',{name:'Increase dish quantity'}).click();
   await menuPage.getByRole('button',{name:'Decrease dish quantity'}).click();
   await menuPage.getByLabel('Special instructions').fill('Less salt.');

@@ -3,6 +3,8 @@
 import {useEffect,useState} from 'react';
 import Image from 'next/image';
 import MenuIcon from './menu-icons';
+import DishPhoto from './dish-photo';
+import useEntrance from './use-entrance';
 
 export function GuestWelcome({name,logo,hero,table,branch,enter,logoRef}){
   return <section className="rg-welcome" aria-label={`Welcome to ${name}`}>
@@ -26,7 +28,7 @@ export function RecommendationSlider({items,recommended,open}){
   return <section className="rg-recommendations" aria-label={recommended?'Daily recommendations':'Explore our menu'} aria-roledescription="carousel" onMouseEnter={()=>setHovered(true)} onMouseLeave={()=>setHovered(false)} onFocusCapture={()=>setHovered(true)} onBlurCapture={event=>{if(!event.currentTarget.contains(event.relatedTarget))setHovered(false);}}>
     <div className="rg-section-heading"><div><span className="rg-kicker">FRESH FROM OUR KITCHEN</span><h2>{recommended?'Daily recommendations':'Explore our menu'}</h2></div>{items.length>1&&<button className="rm-icon-button" aria-label={paused?'Play recommendations':'Pause recommendations'} onClick={()=>setPaused(value=>!value)}><MenuIcon name={paused?'play':'pause'} size={17}/></button>}</div>
     <div className="rg-slide" role="group" aria-roledescription="slide" aria-label={`${current+1} of ${items.length}: ${item.name}`}>
-      {item.photoUrl&&<Image src={item.photoUrl} alt={item.name} fill unoptimized sizes="(max-width:760px) 100vw, 1040px"/>}<div className="rg-slide-shade"/><div className="rg-slide-copy"><span>{recommended?'A little inspiration for today':'FIND YOUR NEXT FAVOURITE'}</span><h3>{item.name}</h3><p>{item.description}</p><button onClick={()=>open(item)}>View more <MenuIcon name="arrow" size={16}/></button></div>
+      <DishPhoto key={item.id} src={item.photoUrl} alt={item.name} className="rg-slide-photo" sizes="(max-width:760px) 100vw, 1040px"/><div className="rg-slide-shade"/><div className="rg-slide-copy"><span>{recommended?'A little inspiration for today':'FIND YOUR NEXT FAVOURITE'}</span><h3>{item.name}</h3><p>{item.description}</p><button className="rg-slide-explore" onClick={()=>open(item)}>View more <span><MenuIcon name="arrow" size={17}/></span></button></div>
     </div>{items.length>1&&<div className="rg-slider-controls"><button aria-label="Previous recommendation" onClick={()=>setIndex(value=>(value-1+items.length)%items.length)}><MenuIcon name="back" size={17}/></button><div>{items.map((item,i)=><button key={item.id} className={i===current?'active':''} aria-label={`Show recommendation ${i+1}: ${item.name}`} aria-pressed={i===current} onClick={()=>setIndex(i)}/>)}</div><button aria-label="Next recommendation" onClick={()=>setIndex(value=>(value+1)%items.length)}><MenuIcon name="arrow" size={17}/></button></div>}
   </section>;
 }
@@ -37,10 +39,11 @@ export function GuestEvents({events}){
 }
 
 export function ParentCategories({categories,allCategories,select}){
-  return <section className="rg-parent-categories" aria-label="Main categories"><div className="rg-section-heading"><div><span className="rg-kicker">SOMETHING FOR EVERY APPETITE</span><h2>Explore our categories</h2></div></div><div className="rg-parent-list">{categories.map(category=>{
+  const ref=useEntrance();
+  return <section className="rg-parent-categories" aria-label="Main categories"><div className="rg-section-heading"><div><span className="rg-kicker">SOMETHING FOR EVERY APPETITE</span><h2>Explore our categories</h2></div></div><div ref={ref} className="rg-parent-list">{categories.map((category,index)=>{
     const children=allCategories.filter(child=>child.parentId===category.id);
     const dishes=[...category.items,...children.flatMap(child=>child.items)];
     const photo=dishes.find(item=>item.photoUrl)?.photoUrl;
-    return <button className="rg-parent-card" key={category.id} onClick={()=>select(category.id)}>{photo?<Image src={photo} alt="" width={140} height={140} unoptimized/>:<span className="rg-category-placeholder"><MenuIcon name="cutlery" size={30}/></span>}<span><strong>{category.name}</strong><small>{children.length?children.map(child=>child.name).join(' · '):`${dishes.length} ${dishes.length===1?'dish':'dishes'} to discover`}</small></span><MenuIcon name="arrow" size={20}/></button>;
+    return <button className="rg-parent-card" key={category.id} data-enter="category" style={{'--rg-enter-delay':`${Math.min(index*75,750)}ms`}} onClick={()=>select(category.id)}>{photo?<Image src={photo} alt="" width={140} height={140} unoptimized/>:<span className="rg-category-placeholder"><MenuIcon name="cutlery" size={30}/></span>}<span><strong>{category.name}</strong><small>{children.length?children.map(child=>child.name).join(' · '):`${dishes.length} ${dishes.length===1?'dish':'dishes'} to discover`}</small></span><MenuIcon name="arrow" size={20}/></button>;
   })}</div></section>;
 }
