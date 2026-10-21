@@ -1,0 +1,32 @@
+[
+  {
+    "name": "pizza-kitchen",
+    "source": "pizza making V2.mp4",
+    "start": 2,
+    "duration": 15,
+    "width": 1280,
+    "height": 720,
+    "audio": false,
+    "bytes": 2979087
+  },
+  {
+    "name": "coffee-ritual",
+    "source": "PORTRAIT VIDEO V2.mp4",
+    "start": 7,
+    "duration": 8,
+    "width": 576,
+    "height": 1024,
+    "audio": false,
+    "bytes": 834939
+  },
+  {
+    "name": "arrival",
+    "source": "ROMINA NEW VIDEO .mp4",
+    "start": 3,
+    "duration": 5.5,
+    "width": 1280,
+    "height": 720,
+    "audio": false,
+    "bytes": 1424050
+  }
+]

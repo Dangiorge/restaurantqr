@@ -216,7 +216,7 @@ try {
   await guestPage.getByRole('button',{name:/Ask for bill/}).click();
   await guestPage.getByRole('heading',{name:'Join us at the table',exact:true}).waitFor();
   await guestPage.getByRole('button',{name:'Close',exact:true}).click();
-  const home=await context.newPage();await home.goto(base);await home.getByRole('heading',{name:/There’s always/}).waitFor();
+  const home=await context.newPage();await home.goto(base);await home.getByRole('heading',{name:/Come hungry/}).waitFor();
   await home.screenshot({path:'.local/previews/romina-home-desktop.png',fullPage:true});
   await home.setViewportSize({width:390,height:844});await home.screenshot({path:'.local/previews/romina-home-mobile.png',fullPage:true});
   assert.equal(await home.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);

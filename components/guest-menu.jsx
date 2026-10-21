@@ -5,6 +5,7 @@ import Image from 'next/image';
 import useLogoFlight from './use-logo-flight';
 import MenuBackdrop from './menu-backdrop';
 import {appearanceVariables,menuAppearance,menuBackground} from '@/modules/menus/appearance.mjs';
+import {menuDestination} from '@/modules/menus/website.mjs';
 import GuestDishDetail from './guest-dish-detail';
 import GuestDishCard from './guest-dish-card';
 import GuestActions from './guest-actions';
@@ -47,20 +48,21 @@ function Sheet({title,children,close,brand,logo,detail=false}){
   return <div className={`rm-overlay ${detail?'rg-detail-overlay':''}`} onClick={e=>{if(e.target===e.currentTarget)close();}}><section className={`rm-sheet ${detail?'rg-dish-sheet':''}`} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={ref}><div className="rm-sheet-handle"/><header className={detail?'rg-detail-sheet-header':''}>{detail&&logo?<div className="rg-detail-brand"><Image src={logo} alt="" width={42} height={42} unoptimized/><span>{brand}<small>GOOD FOOD. GREAT COMPANY.</small></span></div>:<div><span className="rm-eyebrow">{brand} · AT YOUR SERVICE</span><h2>{title}</h2></div>}<button className="rm-icon-button" onClick={close} aria-label="Close"><MenuIcon name="close"/></button></header>{children}</section></div>;
 }
 
-export default function GuestMenu({restaurant,menus,branch,table,token,romina=false}){
-  const [screen,setScreen]=useState('welcome');
+export default function GuestMenu({restaurant,menus,branch,table,token,romina=false,initialQuery}){
+  const initial=useMemo(()=>menuDestination(menus,initialQuery),[menus,initialQuery]);
+  const [screen,setScreen]=useState(initial.screen);
   const [scheduleNow,setScheduleNow]=useState(undefined);
   const welcomeLogo=useRef(null);
   const headerLogo=useRef(null);
   const flyLogo=useLogoFlight();
   const [itemNotes,setItemNotes]=useState({});
   const [search,setSearch]=useState('');
-  const [category,setCategory]=useState('all');
+  const [category,setCategory]=useState(initial.category);
   const [diet,setDiet]=useState('all');
   const [cart,setCart]=useState({});
   const [notes,setNotes]=useState('');
-  const [view,setView]=useState(null);
-  const [selected,setSelected]=useState(null);
+  const [view,setView]=useState(initial.dish?'dish':null);
+  const [selected,setSelected]=useState(initial.dish);
   const [quote,setQuote]=useState(null);
   const [quoteError,setQuoteError]=useState('');
   const [error,setError]=useState('');
@@ -195,7 +197,7 @@ export default function GuestMenu({restaurant,menus,branch,table,token,romina=fa
       </div></>}
     <GuestActions count={count} total={format(liveQuote?.total||subtotal)} busy={busy} menu={()=>navigate('menu')} cart={()=>setView('cart')} call={call} help={()=>setView('help')}/>
     {view&&<Sheet logo={logo} detail={view==='dish'} brand={restaurant.name} title={view==='cart'?'Your order':view==='dish'?selected.name:view==='receipt'?'Your table, your order':view==='service-sent'?'We’ve received your request':view==='scan'?'Join us at the table':'How can we help?'} close={close}>
-      {view==='dish'&&selected&&<GuestDishDetail key={selected.id} dish={selected} inCart={cart[selected.id]||0} note={itemNotes[selected.id]||''} add={addDish}/>}
+      {view==='dish'&&selected&&<GuestDishDetail key={`${selected.id}:${itemNotes[selected.id]||''}`} dish={selected} inCart={cart[selected.id]||0} note={itemNotes[selected.id]||''} add={addDish}/>}
       {view==='cart'&&<div className="rm-cart-sheet">{count? <><p className="rm-cart-context"><MenuIcon name="pin" size={16}/>{table?`${branch} · Table ${table}`:'Scan your table’s QR code to place this order.'}</p>{lines.map(line=>{const dish=dishes.find(d=>d.id===line.itemId);return <div className="rm-cart-line" key={line.itemId}>{dish.photoUrl?<Image src={dish.photoUrl} alt={dish.name} width={70} height={70} unoptimized/>:<span className="rm-cart-placeholder"><MenuIcon name="cutlery"/></span>}<div><strong>{liveQuote?.items.find(i=>i.menuItemId===line.itemId)?.name||dish.name}</strong><small>{format(liveQuote?.items.find(i=>i.menuItemId===line.itemId)?.unitPrice||dish.basePrice)} ETB</small>{itemNotes[dish.id]&&<small className="rg-cart-instructions">{itemNotes[dish.id]}</small>}</div><Quantity value={line.quantity} onChange={q=>quantity(dish.id,q)} label={dish.name}/></div>;})}<label className="rm-notes">Make it just right<textarea placeholder="Any special instructions? Tell our kitchen…" maxLength={500} value={notes} onChange={e=>{setNotes(e.target.value);store(cart,e.target.value);}} rows={2}/><small>For allergies, please also speak directly with your waiter.</small></label><dl className="rm-totals"><div><dt>Subtotal</dt><dd>{format(liveQuote?.subtotal||subtotal)} ETB</dd></div>{liveQuote&&<><div><dt>Tax ({liveQuote.taxRate}%)</dt><dd>{format(liveQuote.taxAmount)} ETB</dd></div><div><dt>Service ({liveQuote.serviceChargeRate}%)</dt><dd>{format(liveQuote.serviceAmount)} ETB</dd></div></>}<div className="rm-total"><dt>{liveQuote?'Total':'Estimated subtotal'}</dt><dd>{format(liveQuote?.total||subtotal)} ETB</dd></div></dl>{quoteError&&<p className="rm-error" role="alert">{quoteError}</p>}{!token&&<p className="rm-soft-note">You’re browsing our public menu. Scan the QR at your table to send an order or ask a waiter for help.</p>}<button className="rm-primary rm-full" disabled={busy||!token||!liveQuote||Boolean(quoteError)} onClick={submitOrder}>{busy?'Sending your order…':'Place order'}<MenuIcon name="arrow" size={19}/></button><p className="rm-payment-note">Your order goes to our team for acceptance. Pay at the restaurant.</p></>:<div className="rm-empty"><MenuIcon name="cart" size={40}/><h3>A good meal starts with a good choice.</h3><p>Add a dish you love and we’ll keep it here.</p><button className="rm-primary" onClick={close}>Explore the menu<MenuIcon name="arrow" size={18}/></button></div>}</div>}
       {view==='help'&&<div className="rm-help-list"><p className="rm-soft-note">{table?`Let our team know what you need at table ${table}.`:'Table service is available when you scan the QR at your table.'}</p>{serviceTypes.map(([type,icon,label,description])=><button disabled={busy} onClick={()=>call(type)} key={type}><span className="rm-help-icon"><MenuIcon name={icon}/></span><span><strong>{label}</strong><small>{description}</small></span><MenuIcon name="arrow" size={18}/></button>)}</div>}
       {view==='scan'&&<div className="rm-empty"><MenuIcon name="pin" size={38}/><h3>A little closer to your table.</h3><p>Scan your table’s QR code to place an order, call a waiter, or request your bill. Our team can help you find it.</p><button className="rm-primary" onClick={close}>Back to the menu</button></div>}

@@ -1,5 +1,6 @@
 export default function MenuIcon({name,size=22,...props}){
   const paths={
+    leaf:<><path d="M20 3C9 2 3 8 5 15s14 9 15-12Z"/><path d="M3 21 15 9M8 16l-1-6m6 1 5 1"/></>,
     expand:<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/>,
     contract:<path d="M3 8h5V3m13 5h-5V3M8 21v-5H3m13 5v-5h5"/>,
     more:<><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></>,

@@ -1,0 +1,58 @@
+[
+  {
+    "name": "sharing-platter",
+    "source": "public/video/photo_2026-10-21_06-18-53.jpg",
+    "src": "/media/romina/sharing-platter.webp",
+    "alt": "Traditional platter on a red-covered Romina table",
+    "sha256": "db77c5095ddcff1471c522493181cedb63a092551db2d07bf31e1007aab86243"
+  },
+  {
+    "name": "fish-cream",
+    "source": "public/video/photo_2026-10-21_06-18-07.jpg",
+    "src": "/media/romina/fish-cream.webp",
+    "alt": "Fish with a creamy mushroom sauce and lime",
+    "sha256": "4e3ec4dd8caa19fdefbde2ac29385da035122c356a2dead5868d77e2aaa836f0"
+  },
+  {
+    "name": "pasta",
+    "source": "public/video/photo_2026-10-21_06-18-26.jpg",
+    "src": "/media/romina/pasta.webp",
+    "alt": "Pasta served on a white plate",
+    "sha256": "85d787145e9117277691847d18fe9c1042f44aee3149656c555dc1d6cc65fa5c"
+  },
+  {
+    "name": "grill",
+    "source": "public/video/photo_2026-10-21_06-18-58.jpg",
+    "src": "/media/romina/grill.webp",
+    "alt": "Grilled meat with fries and vegetables",
+    "sha256": "247efa5672e3293c05610eae8ba206db2e01e3452a274a15d2a04513ca29a679"
+  },
+  {
+    "name": "kitchen-team",
+    "source": "public/video/photo_2026-10-21_06-19-05.jpg",
+    "src": "/media/romina/kitchen-team.webp",
+    "alt": "Romina chefs presenting a freshly prepared pizza",
+    "sha256": "4bcfdc3c66c8af0e18f3ec58930f25993233b1e96d985334cc2f299684f68270"
+  },
+  {
+    "name": "story-dining",
+    "source": "public/video/photo_2026-10-21_06-19-34.jpg",
+    "src": "/media/romina/story-dining.webp",
+    "alt": "Romina dining room with brick walls and pendant lights",
+    "sha256": "4fb9be6c466c9646fe5d1a993806df21ece4fa38c12235ff6a09f5debaa896dd"
+  },
+  {
+    "name": "terrace",
+    "source": "public/video/photo_2026-10-21_06-19-20.jpg",
+    "src": "/media/romina/terrace.webp",
+    "alt": "Romina outdoor tables under red parasols",
+    "sha256": "6c33530c0458acf854bcec1068948d8ff152c4bcd2ff09b57ee8c268b70785bd"
+  },
+  {
+    "name": "dining-room",
+    "source": "public/video/photo_2026-10-21_06-19-37.jpg",
+    "src": "/media/romina/dining-room.webp",
+    "alt": "Romina dining room with tables arranged along a banquette",
+    "sha256": "0e3100860fc9ad65c4fda2f1a5a6f85f3028e93a9a1199f91b02927f46c4c906"
+  }
+]

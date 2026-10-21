@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {guestDiscovery,orderInstructions,nextDiscoveryChange} from '../modules/menus/discovery.mjs';
 import {guestContentInput,appearanceInput} from '../modules/validation.mjs';
 import {menuAppearance,menuBackground} from '../modules/menus/appearance.mjs';
+import {websiteContent,menuDestination} from '../modules/menus/website.mjs';
 import {mutate} from '../modules/workspace/service.mjs';
 
 test('discovery skips unavailable recommendations and draft, future or expired events',()=>{
@@ -16,6 +17,19 @@ test('discovery skips unavailable recommendations and draft, future or expired e
 });
 test('dish instructions are included only for dishes in the submitted cart',()=>{
   assert.equal(orderInstructions([{itemId:'a',quantity:2}],[{id:'a',name:'Shiro'}],' No cutlery ',{a:' Less spicy ',removed:'Do not include'}),'No cutlery\nShiro: Less spicy');
+});
+
+test('website uses current published menu data and deep links only to dishes in that menu',()=>{
+  const menus=[{categories:[{id:'parent',name:'Traditional',parentId:null,items:[]},{id:'child',name:'Stews',parentId:'parent',items:[{id:'dish',name:'Shiro',photoUrl:'https://example.test/shiro.webp',available:true,basePrice:'300.50'},{id:'sold',name:'Sold out',available:false}]}]}];
+  const data=websiteContent({menus,settings:{guestContent:{recommendedItemIds:['sold','dish','foreign']}}});
+  assert.deepEqual(data.featured.map(item=>item.id),['dish']);assert.equal(data.featured[0].basePrice,'300.50');assert.equal(data.categories.length,1);assert.equal(data.categories[0].count,2);
+  assert.equal(data.hero,'https://example.test/shiro.webp');
+  assert.equal(menuDestination(menus,{dish:'dish'}).dish.categoryName,'Stews');assert.equal(menuDestination(menus,{dish:'dish'}).category,'child');
+  assert.equal(menuDestination(menus,{category:'parent'}).screen,'items');assert.equal(menuDestination(menus,{view:'menu'}).screen,'menu');
+  assert.equal(menuDestination(menus,{dish:'foreign'}).dish,null);assert.equal(menuDestination(menus,{category:['parent']}).screen,'welcome');
+  menus[0].categories[0].items.push({id:'extra',name:'Another available dish',available:true,basePrice:'250.00'});
+  assert.deepEqual(websiteContent({menus,settings:{guestContent:{recommendedItemIds:['dish']}}}).featured.map(item=>item.id),['dish','extra']);
+  assert.equal(websiteContent(null).featured.length,0);assert.equal(menuDestination([],{}).screen,'welcome');
 });
 test('guest-content input rejects invalid event schedules, unsafe posters and duplicate recommendations',()=>{
   assert.deepEqual(guestContentInput.parse({}),{heroUrl:'',backgrounds:[],recommendedItemIds:[],events:[]});
