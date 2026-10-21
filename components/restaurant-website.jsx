@@ -2,8 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import SiteHeader from './site-header';
 import SiteMotion from './site-motion';
-import BrandIntro from './brand-intro';
 import BeerPour from './beer-pour';
+import CuisineJourney from './cuisine-journey';
 import RestaurantFilm from './restaurant-film';
 import MenuIcon from './menu-icons';
 import {websiteContent} from '@/modules/menus/website.mjs';
@@ -24,7 +24,6 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
   const seenPhotos=new Set();
 
   return <SiteMotion>
-    {!staticPreview&&<BrandIntro/>}
     <a className="rs-skip" href="#main-content">Skip to content</a>
     <SiteHeader/>
     <main id="main-content">
@@ -56,6 +55,8 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
         {!featured.length&&<div className="rs-menu-empty"><h3>A delicious discovery awaits.</h3><p>{staticPreview?'Explore our menu to find your next favourite.':'Ask our team for today’s dishes while the digital menu is being prepared.'}</p><Link href="/menu?view=menu" className="rs-button">Explore the menu<Arrow/></Link></div>}
         {categories.length>0&&<div className="rs-categories" data-site-reveal="up"><span className="rs-eyebrow">FOLLOW YOUR APPETITE</span><div>{categories.map(category=><Link key={category.id} href={`/menu?category=${encodeURIComponent(category.id)}`}><span>{category.name}<small>{category.count} {category.count===1?'dish':'dishes'}</small></span><Arrow size={18}/></Link>)}</div></div>}
       </section>
+
+      <CuisineJourney restaurant={restaurant}/>
 
       <section id="from-kitchen" className="rs-kitchen">
         <div className="rs-section-heading rs-section" data-site-reveal="up"><div><span className="rs-eyebrow">THE PEOPLE. THE CRAFT. THE CARE.</span><h2>Made by hand.<br/><em>Served with heart.</em></h2></div><p>From a dusting of flour to that first slice. Step into the Romina kitchen.</p></div>

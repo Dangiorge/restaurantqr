@@ -16,6 +16,7 @@ import './guest-appearance.css';
 import './guest-dishes.css';
 import './restaurant-site.css';
 import './beer-pour.css';
+import './cuisine-atlas.css';
 
 export const metadata = {
   title: "Tableline · Restaurant workspace",
