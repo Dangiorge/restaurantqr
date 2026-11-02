@@ -4,6 +4,7 @@ import SiteHeader from './site-header';
 import SiteMotion from './site-motion';
 import BeerPour from './beer-pour';
 import CuisineJourney from './cuisine-journey';
+import RominaHistory from './romina-history';
 import RestaurantFilm from './restaurant-film';
 import MenuIcon from './menu-icons';
 import {websiteContent} from '@/modules/menus/website.mjs';
@@ -37,19 +38,21 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
           <div className="rs-hero-actions"><Link href="/menu?view=menu" className="rs-button">Explore the menu<Arrow/></Link><a href="#visit" className="rs-link rs-link-light">Find your table<Arrow size={17}/></a></div>
         </div>
         <div className="rs-hero-caption"><span>MADE FOR SHARING</span><span>Made for you.</span></div>
-        <a href="#our-menu" className="rs-scroll-cue"><span/>FOLLOW YOUR APPETITE</a>
+        <a href="#our-table" className="rs-scroll-cue"><span/>DISCOVER OUR STORY</a>
       </section>
+
+      <RominaHistory/>
 
       <div className="rs-marquee" aria-label="Good food. Great company. Since 1973."><div aria-hidden="true">{[0,1,2,3].map(copy=><span key={copy}>GOOD FOOD <i>✳</i> GREAT COMPANY <i>✳</i> SINCE 1973 <i>✳</i></span>)}</div></div>
 
       <section id="our-menu" className="rs-menu-section rs-section">
-        <div className="rs-section-heading" data-site-reveal="up"><div><span className="rs-eyebrow">FROM OUR KITCHEN TO YOUR TABLE</span><h2>Your next<br/><em>craving.</em></h2></div><div><p>The dishes. The details. The first bite.</p><Link href="/menu?view=menu" className="rs-link">See the full menu<Arrow size={17}/></Link></div></div>
+        <div className="rs-section-heading rs-menu-heading" data-site-reveal="up"><div><span className="rs-eyebrow">FROM OUR KITCHEN TO YOUR TABLE</span><h2>Your next<br/><em>craving.</em></h2><svg className="rs-craving-flourish" viewBox="0 0 320 45" fill="none" aria-hidden="true"><path d="M5 26C66 3 239 2 310 16C324 21 220 38 158 33" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg></div><div><span className="rs-menu-handwriting">A little temptation.</span><p>Fresh from our kitchen.<br/>Find the dish that calls your name.</p><Link href="/menu?view=menu" className="rs-link">Explore the full menu<Arrow size={17}/></Link></div></div>
         <div className="rs-dish-grid" data-count={featured.length}>{featured.map((dish,index)=>{
           const showPhoto=dish.photoUrl&&!seenPhotos.has(dish.photoUrl);
           if(showPhoto)seenPhotos.add(dish.photoUrl);
-          return <Link key={dish.id} href={dishLink(dish.id)} className="rs-food-card" data-site-reveal="up" style={{'--rs-delay':`${Math.min(index*85,425)}ms`}}>
-            <div className="rs-food-card-image">{showPhoto?<Image src={dish.photoUrl} alt={dish.name} fill unoptimized sizes="(max-width:600px) 90vw, (max-width:1000px) 45vw, 420px"/>:<span className="rs-food-fallback"><MenuIcon name="cutlery" size={35}/></span>}<span className="rs-food-number">{String(index+1).padStart(2,'0')}</span><span className="rs-food-open"><Arrow/></span>{dish.dietaryType==='VEGAN'&&<span className="rs-food-vegan">Vegan</span>}</div>
-            <div className="rs-food-card-copy"><span className="rs-eyebrow">{dish.categoryName}</span><h3>{dish.name}</h3><strong>{money(dish.basePrice)} <small>ETB</small></strong></div>
+          return <Link key={dish.id} href={dishLink(dish.id)} className="rs-food-card" data-site-reveal="up" data-site-parallax style={{'--rs-delay':`${Math.min(index*100,500)}ms`}}>
+            <div className="rs-food-card-image">{showPhoto?<Image src={dish.photoUrl} alt={dish.name} fill unoptimized sizes="(max-width:600px) 90vw, (max-width:1000px) 45vw, 420px"/>:<span className="rs-food-fallback"><MenuIcon name="cutlery" size={35}/></span>}<span className="rs-food-number">{String(index+1).padStart(2,'0')}</span><span className="rs-food-open">View dish<Arrow size={17}/></span>{dish.dietaryType==='VEGAN'&&<span className="rs-food-vegan">Vegan</span>}</div>
+            <div className="rs-food-card-copy"><span className="rs-eyebrow">{dish.categoryName}</span><h3>{dish.name.trim().replace(/[,;]+$/,'')}</h3><div className="rs-food-card-price"><strong>{money(dish.basePrice)} <small>ETB</small></strong><span>Discover<Arrow size={16}/></span></div></div>
           </Link>;
         })}</div>
         {!featured.length&&<div className="rs-menu-empty"><h3>A delicious discovery awaits.</h3><p>{staticPreview?'Explore our menu to find your next favourite.':'Ask our team for today’s dishes while the digital menu is being prepared.'}</p><Link href="/menu?view=menu" className="rs-button">Explore the menu<Arrow/></Link></div>}
@@ -68,16 +71,11 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
 
       <section id="experience" className="rs-tastes rs-section" aria-labelledby="tastes-title">
         <div className="rs-section-heading" data-site-reveal="up"><div><span className="rs-eyebrow">A TABLE FOR EVERY APPETITE</span><h2 id="tastes-title">More to<br/><em>fall for.</em></h2></div><p>Something comforting. Something sizzling. Something you’ll come back for.</p></div>
-        <div className="rs-taste-grid">{[
+        <div className="rs-fall-runway" data-site-dive><div className="rs-fall-pin"><div className="rs-fall-orbit" aria-hidden="true"/><span className="rs-fall-ghost" aria-hidden="true">give in.</span><span className="rs-fall-hint" aria-hidden="true">SCROLL A LITTLE. FALL A LITTLE.<Arrow size={16}/></span><div className="rs-taste-grid">{[
           ['fish-cream','Fish with creamy mushroom sauce and lime','Comfort, on a plate.','01'],
           ['pasta','Pasta served at Romina','One more forkful.','02'],
           ['grill','Grilled meat served with fries and vegetables','Straight to your favourites.','03'],
-        ].map(([photo,alt,title,number],index)=><Link key={photo} href="/menu?view=menu" className="rs-taste" data-site-reveal="right" style={{'--rs-delay':`${index*100}ms`}}><div className="rs-taste-image" data-site-parallax><Image src={`${MEDIA}${photo}.webp`} alt={alt} fill unoptimized sizes="(max-width:760px) 90vw, 45vw"/><span>{number}</span></div><div><h3>{title}</h3><Arrow size={21}/></div></Link>)}</div>
-      </section>
-
-      <section id="our-table" className="rs-story">
-        <div className="rs-story-photo" data-site-parallax><Image src={`${MEDIA}story-dining.webp`} alt="A Romina dining room with brick walls, pendant lighting, and tables for good company" fill unoptimized sizes="(max-width:760px) 100vw, 55vw"/><span className="rs-photo-caption">A ROMINA TABLE. A LIFETIME OF STORIES.</span></div>
-        <div className="rs-story-copy" data-site-reveal="up"><span className="rs-eyebrow">IT STARTED IN 4 KILLO</span><h2>Full of food.<br/><em>Full of stories.</em></h2><p className="rs-lead">Students, teachers, old friends. Romina at 4 Killo has been part of the conversation since 1973.</p><p>Lunch between lectures. A familiar face. A favourite table. For generations, people have come for the food and stayed for the company.</p><div className="rs-history-mark"><strong>1973</strong><span>OUR STORY BEGAN IN ARAT KILO.<br/>YOUR NEXT CHAPTER STARTS AT THE TABLE.</span></div><a href="#visit" className="rs-link">Make yourself at home<Arrow size={17}/></a></div>
+        ].map(([photo,alt,title,number],index)=><Link key={photo} href="/menu?view=menu" className="rs-taste" data-site-reveal="right" style={{'--rs-delay':`${index*100}ms`,'--fall-index':index}}><div className="rs-taste-image" data-site-parallax><Image src={`${MEDIA}${photo}.webp`} alt={alt} fill unoptimized sizes="(max-width:760px) 90vw, 45vw"/><span>{number}</span></div><div><h3>{title}</h3><Arrow size={21}/></div></Link>)}</div><Link className="rs-fall-cta rs-button" href="/menu?view=menu">Find your favourite<Arrow size={18}/></Link></div></div>
       </section>
 
       <section className="rs-coffee rs-section" aria-labelledby="coffee-title">

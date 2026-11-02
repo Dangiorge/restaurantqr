@@ -14,6 +14,8 @@ export default function SiteMotion({children}){
     const preference=window.matchMedia('(prefers-reduced-motion: reduce)');
     const sections=[...root.querySelectorAll('[data-site-reveal]')];
     const scenes=[...root.querySelectorAll('[data-site-parallax]')];
+    const dives=[...root.querySelectorAll('[data-site-dive]')];
+    const connection=navigator.connection;
     const hero=root.querySelector('.rs-hero-photo');
     const progress=root.querySelector('.rs-scroll-progress');
     let observer,frame;
@@ -28,10 +30,18 @@ export default function SiteMotion({children}){
         const value=Math.max(0,Math.min(1,(window.innerHeight-bounds.top)/(window.innerHeight+bounds.height)));
         scene.style.setProperty('--rs-scene',value.toFixed(3));
       });
+      if(root.dataset.siteDepth==='scroll')dives.forEach(scene=>{
+        const bounds=scene.getBoundingClientRect();
+        if(bounds.bottom<0||bounds.top>innerHeight)return;
+        const pin=scene.querySelector('.rs-fall-pin');
+        const value=Math.max(0,Math.min(1,(110-bounds.top)/Math.max(1,bounds.height-pin.offsetHeight)));
+        scene.style.setProperty('--rs-dive',value.toFixed(4));
+      });
     }
     function scroll(){if(!frame)frame=requestAnimationFrame(paint);}
     function configure(){
       observer?.disconnect();
+      root.dataset.siteDepth=!preference.matches&&!connection?.saveData&&innerWidth>760&&innerHeight>=680?'scroll':'still';
       if(paused||preference.matches){sections.forEach(section=>section.dataset.siteState='visible');return;}
       const waiting=sections.filter(section=>section.dataset.siteState!=='visible');
       if('IntersectionObserver' in window){
@@ -41,8 +51,12 @@ export default function SiteMotion({children}){
       }
       scroll();
     }
-    configure();window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('resize',scroll);preference.addEventListener('change',configure);
-    return()=>{observer?.disconnect();if(frame)cancelAnimationFrame(frame);window.removeEventListener('scroll',scroll);window.removeEventListener('resize',scroll);preference.removeEventListener('change',configure);};
+    function resize(){
+      const next=!preference.matches&&!connection?.saveData&&innerWidth>760&&innerHeight>=680?'scroll':'still';
+      if(root.dataset.siteDepth!==next)configure();else scroll();
+    }
+    configure();window.addEventListener('scroll',scroll,{passive:true});window.addEventListener('resize',resize);preference.addEventListener('change',configure);connection?.addEventListener('change',configure);
+    return()=>{observer?.disconnect();if(frame)cancelAnimationFrame(frame);window.removeEventListener('scroll',scroll);window.removeEventListener('resize',resize);preference.removeEventListener('change',configure);connection?.removeEventListener('change',configure);};
   },[paused]);
-  return <MotionPause.Provider value={paused}><div className="rs-site" ref={ref} data-site-paused={paused}><div className="rs-scroll-progress" aria-hidden="true"/>{children}<button className="rs-motion-toggle" onClick={()=>setPaused(value=>!value)} aria-pressed={paused} aria-label={paused?'Resume website animations':'Pause website animations'}><MenuIcon name={paused?'play':'pause'} size={13}/><span>{paused?'Motion paused':'Pause motion'}</span></button></div></MotionPause.Provider>;
+  return <MotionPause.Provider value={paused}><div className="rs-site" ref={ref} data-site-paused={paused} data-site-depth="still"><div className="rs-scroll-progress" aria-hidden="true"/>{children}<button className="rs-motion-toggle" onClick={()=>setPaused(value=>!value)} aria-pressed={paused} aria-label={paused?'Resume website animations':'Pause website animations'}><MenuIcon name={paused?'play':'pause'} size={13}/><span>{paused?'Motion paused':'Pause motion'}</span></button></div></MotionPause.Provider>;
 }

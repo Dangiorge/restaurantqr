@@ -27,8 +27,8 @@ try{
   await page.locator('.rs-hero-photo img').evaluate(image=>image.decode());
   await page.waitForFunction(()=>!document.querySelector('.romina-intro')?.dataset.play);
   assert.equal(movieRequests.length,0,'No film downloads during initial hero view');
-  const images=await page.locator('.rs-site:visible main img').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('src')));
-  assert.equal(new Set(images).size,images.length,'Homepage does not repeat a photograph');
+  const images=await page.locator('.rs-site:visible main img').evaluateAll(nodes=>nodes.filter(node=>!node.closest('.rh-history,.rs-atlas')).map(node=>node.getAttribute('src')));
+  assert.equal(new Set(images).size,images.length,'The food and venue showcase avoids repeated photographs; history and map reuse are intentional');
   await page.screenshot({path:'.local/previews/romina-curated-hero.png'});
   const kitchen=page.locator('#from-kitchen .rs-film');await kitchen.scrollIntoViewIfNeeded();
   await page.waitForFunction(()=>{const video=document.querySelector('#from-kitchen video');return video.currentTime>.1&&!video.paused;});
@@ -42,7 +42,7 @@ try{
   assert.equal(await kitchen.locator('video').evaluate(video=>video.paused),true,'Offscreen footage pauses');
   await page.locator('#visit .rs-film').scrollIntoViewIfNeeded();await page.waitForFunction(()=>document.querySelector('#visit video').currentTime>.1);
   assert.equal(new Set(movieRequests).size,3,'Each reviewed non-beer video has its own section');
-  await page.locator('#our-table').scrollIntoViewIfNeeded();await page.getByText('Students, teachers, old friends.',{exact:false}).waitFor();
+  await page.locator('#history-second-home').scrollIntoViewIfNeeded();await page.locator('.rh-memories-copy').getByText('Students, teachers, families.',{exact:false}).waitFor();
   await page.getByRole('button',{name:'Pause website animations'}).click();
   await page.screenshot({path:'.local/previews/romina-curated-story.png'});
   // Expand the sticky scene only for the static full-page capture: otherwise
@@ -61,7 +61,7 @@ try{
   still.on('request',request=>{if(/\/media\/romina\/.*\.mp4/.test(request.url()))reducedVideos++;});await still.goto(base);await still.locator('.rs-food-card').first().waitFor();await still.locator('#from-kitchen').scrollIntoViewIfNeeded();
   assert.equal(await still.locator('#from-kitchen video').getAttribute('src'),null);assert.equal(reducedVideos,0,'Reduced motion uses real posters without movie downloads');
   const saver=await browser.newContext();await saver.addInitScript(()=>Object.defineProperty(navigator,'connection',{value:{saveData:true,addEventListener(){},removeEventListener(){}}}));const economical=await saver.newPage();await economical.goto(base);await economical.locator('.rs-food-card').first().waitFor();await economical.locator('.rs-coffee').scrollIntoViewIfNeeded();assert.equal(await economical.locator('.rs-coffee video').getAttribute('src'),null);
-  const noJs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});const plain=await noJs.newPage();await plain.goto(base);await plain.locator('.rs-site:visible #our-table').scrollIntoViewIfNeeded();assert.equal(await plain.locator('.rs-site:visible .rs-story-copy').evaluate(node=>getComputedStyle(node).opacity),'1');
+  const noJs=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});const plain=await noJs.newPage();await plain.goto(base);await plain.locator('.rs-site:visible #history-beginnings').scrollIntoViewIfNeeded();assert.equal(await plain.locator('.rs-site:visible .rh-opening-copy').evaluate(node=>getComputedStyle(node).opacity),'1');
   for(const image of await plain.locator('.rs-site:visible .rs-film>img').all())await image.evaluate(node=>node.decode());
   const failed=await browser.newPage();await failed.route('**/media/romina/*.mp4',route=>route.abort());await failed.goto(base);await failed.locator('.rs-food-card').first().waitFor();await failed.locator('#from-kitchen').scrollIntoViewIfNeeded();
   await failed.waitForFunction(()=>document.querySelector('#from-kitchen video')?.error);await failed.locator('#from-kitchen .rs-film>img').evaluate(node=>node.decode());assert.equal(await failed.locator('#from-kitchen .rs-film').getAttribute('data-playing'),'false','A failed film keeps its poster');

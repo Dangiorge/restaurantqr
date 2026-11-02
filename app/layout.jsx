@@ -3,6 +3,8 @@ import '@fontsource/poppins/600.css';
 import '@fontsource/poppins/700.css';
 import '@fontsource/cormorant-garamond/500.css';
 import '@fontsource/cormorant-garamond/600.css';
+import '@fontsource/cormorant-garamond/500-italic.css';
+import '@fontsource/cormorant-garamond/600-italic.css';
 import '@fontsource/manrope/400.css';
 import '@fontsource/manrope/500.css';
 import '@fontsource/manrope/600.css';
@@ -17,6 +19,10 @@ import './guest-dishes.css';
 import './restaurant-site.css';
 import './beer-pour.css';
 import './cuisine-atlas.css';
+import './romina-history.css';
+import './romina-newspaper.css';
+import './restaurant-art.css';
+import './aged-film.css';
 
 export const metadata = {
   title: "Tableline · Restaurant workspace",

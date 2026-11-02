@@ -1,0 +1,38 @@
+/* Silent-film dust and scratches. The editorial text stays in place and sharp. */
+.rh-aged-film{position:absolute;inset:0;overflow:hidden;pointer-events:none;user-select:none;z-index:6;contain:strict}
+.rh-aged-film>span,.rh-aged-film>i{position:absolute;display:block;pointer-events:none;animation-play-state:paused}
+.rh-film-dust{inset:-15%;background:url('/history/silent-film-dust.svg') repeat;background-size:560px 440px;opacity:.2;animation:rh-film-dust-drift 2.7s steps(1,end) infinite}
+.rh-film-dust-soft{background-size:850px 660px;opacity:.13;filter:blur(.45px);animation-duration:4.1s;animation-direction:reverse}
+.rh-film-scratch{top:-75%;left:12%;width:2px;height:64%;opacity:0;background:linear-gradient(0deg,transparent,#0008 14%,#000b 51%,#0005 85%,transparent);clip-path:polygon(35% 0,85% 13%,48% 27%,75% 46%,35% 68%,62% 82%,25% 100%,5% 77%,23% 60%,0 41%,28% 18%);filter:blur(.15px);animation:rh-film-scratch-fall 5.7s linear infinite;animation-delay:-1.2s}
+.rh-film-scratch:nth-of-type(2){left:38%;height:39%;width:1px;animation-duration:7.3s;animation-delay:-5.1s}
+.rh-film-scratch:nth-of-type(3){left:69%;height:85%;width:2px;animation-duration:8.9s;animation-delay:-3.7s}
+.rh-film-scratch:nth-of-type(4){left:91%;height:52%;width:1px;animation-duration:4.8s;animation-delay:-.8s}
+.rh-film-veil{inset:0;background:#000;opacity:.008;animation:rh-film-projector 4.7s steps(1,end) infinite}
+.rh-film-scene[data-film-active=true] .rh-aged-film>*{animation-play-state:running}
+.rh-paper-fold-bottom .rh-film-dust{animation-delay:-1.6s}.rh-paper-fold-bottom .rh-film-scratch{animation-delay:-3.4s}
+.rh-film-scene[data-film-active=true] .rh-paper-photo img{animation:rh-film-gate 5.8s steps(1,end) infinite;animation-play-state:running}
+@keyframes rh-film-scratch-fall{
+  0%,5%{opacity:0;transform:translate3d(0,-15%,0)}
+  8%{opacity:.5;transform:translate3d(0,5%,0)}
+  13%{opacity:.18;transform:translate3d(2px,28%,0)}
+  21%{opacity:.48;transform:translate3d(-1px,58%,0)}
+  32%{opacity:.25;transform:translate3d(1px,102%,0)}
+  43%{opacity:.4;transform:translate3d(0,154%,0)}
+  54%{opacity:0;transform:translate3d(-2px,210%,0)}
+  100%{opacity:0;transform:translate3d(0,250%,0)}
+}
+@keyframes rh-film-dust-drift{
+  0%{transform:translate3d(0,-8%,0)}15%{transform:translate3d(-2%,-4%,0)}29%{transform:translate3d(3%,0,0)}
+  44%{transform:translate3d(-1%,4%,0)}57%{transform:translate3d(2%,8%,0)}73%{transform:translate3d(-3%,11%,0)}
+  88%{transform:translate3d(1%,14%,0)}100%{transform:translate3d(0,17%,0)}
+}
+@keyframes rh-film-projector{0%,100%{opacity:.008}19%{opacity:.017}37%{opacity:.01}53%{opacity:.024}71%{opacity:.012}89%{opacity:.019}}
+@keyframes rh-film-gate{0%,100%{transform:translate(0,0) scale(1.003)}23%{transform:translate(.4px,-.4px) scale(1.003)}49%{transform:translate(-.5px,.3px) scale(1.003)}76%{transform:translate(.3px,.4px) scale(1.003)}}
+/* Permanent paper wear follows each unfolding panel, including the centre crease. */
+.rh-paper-wear{position:absolute;inset:0;z-index:4;pointer-events:none;background-image:url('/history/paper-creases.svg');background-size:100% 100%;opacity:.58;box-shadow:inset 0 0 27px #68532c13}
+.rh-paper-wear:before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,#80643d13,transparent 2.5%,transparent 97.5%,#80643d13),linear-gradient(180deg,#80643d0b,transparent 3%,transparent 97%,#80643d0f)}
+.rh-paper-fold-bottom .rh-paper-wear{background-position:center;transform:scaleX(-1)}
+.rh-paper-fold-top{border-top-color:#a69b7f}.rh-paper-fold-bottom{border-bottom-color:#a69b7f}
+.rh-history[data-history-motion=still] .rh-aged-film>*,.rh-history[data-history-motion=still] .rh-paper-photo img{animation:none!important}
+@media(prefers-reduced-motion:reduce){.rh-aged-film>*,.rh-film-scene .rh-paper-photo img{animation:none!important;transform:none!important}}
+@media print{.rh-aged-film,.rh-paper-wear{display:none}.rh-film-scene .rh-paper-photo img{animation:none!important;transform:none!important}}
