@@ -64,7 +64,8 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
         {categories.length>0&&<div className="rs-categories" data-site-reveal="up"><span className="rs-eyebrow">FOLLOW YOUR APPETITE</span><div>{categories.map(category=><Link key={category.id} href={`/menu?category=${encodeURIComponent(category.id)}`}><span>{category.name}<small>{category.count} {category.count===1?'dish':'dishes'}</small></span><Arrow size={18}/></Link>)}</div></div>}
       </section>
 
-      <CuisineJourney restaurant={restaurant}/>
+      {/* Hidden for now at the client's request — keep the component and import, just not rendered. */}
+      {false&&<CuisineJourney restaurant={restaurant}/>}
 
       <section id="from-kitchen" className="rs-kitchen">
         <div className="rs-section-heading rs-section" data-site-reveal="up"><div><span className="rs-eyebrow">THE PEOPLE. THE CRAFT. THE CARE.</span><h2>Made by hand.<br/><em>Served with heart.</em></h2></div><p>From a dusting of flour to that first slice. Step into the Romina kitchen.</p></div>
