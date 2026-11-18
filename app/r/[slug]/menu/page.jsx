@@ -11,6 +11,7 @@ async function Menu({params}) {
   const {slug}=await params;
   const restaurant=await publicRestaurant(database(),slug);
   if(!restaurant)notFound();
-  return <GuestMenu restaurant={JSON.parse(JSON.stringify(restaurant))} menus={JSON.parse(JSON.stringify(restaurant.menus))} romina={slug===(process.env.ROMINA_RESTAURANT_SLUG||'romina')}/>;
+  const primaryBranch=restaurant.branches?.[0];
+  return <GuestMenu restaurant={JSON.parse(JSON.stringify(restaurant))} menus={JSON.parse(JSON.stringify(restaurant.menus))} openingHours={primaryBranch?.openingHours} timezone={primaryBranch?.timezone} romina={slug===(process.env.ROMINA_RESTAURANT_SLUG||'romina')}/>;
 }
 export default function Page(props){return <Suspense fallback={<main className="loading">Preparing your menu…</main>}><Menu {...props}/></Suspense>;}

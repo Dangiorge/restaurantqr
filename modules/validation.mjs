@@ -22,9 +22,19 @@ const guestImage=z.union([z.literal(''),z.url().refine(value=>{try{return new UR
 const eventDate=z.union([z.literal(''),z.iso.datetime()]).default('');
 export const appearanceInput=z.object({style:z.enum(['glass','classic']).default('glass'),backgroundUrl:guestImage,useWelcomeBackground:z.boolean().default(true),overlay:z.number().int().min(20).max(85).default(45),panelOpacity:z.number().int().min(60).max(95).default(76),blur:z.number().int().min(0).max(28).default(18),motion:z.boolean().default(true)}).strict();
 const backgroundInput=z.object({id:z.uuid(),label:name,url:guestImage.refine(Boolean,'Upload a background image.'),active:z.boolean().default(true),startsAt:eventDate,endsAt:eventDate,eventId:z.uuid().nullable().default(null),priority:z.coerce.number().int().min(0).max(100).default(0)}).strict().refine(image=>!image.startsAt||!image.endsAt||image.endsAt>image.startsAt,'The background end must follow its start.');
-export const guestContentInput=z.object({appearance:appearanceInput.optional(),heroUrl:guestImage,backgrounds:z.array(backgroundInput).max(20).default([]),recommendedItemIds:z.array(id).max(12).refine(ids=>new Set(ids).size===ids.length,'Choose each dish once.').default([]),events:z.array(z.object({id:z.uuid(),title:name,description:text,posterUrl:guestImage.refine(value=>Boolean(value),'Upload an event poster.'),active:z.boolean().default(true),startsAt:eventDate,endsAt:eventDate}).strict().refine(event=>!event.startsAt||!event.endsAt||event.endsAt>=event.startsAt,'The event end must follow its start.')).max(10).default([])}).strict().superRefine((content,ctx)=>{
+const ratingInput=z.object({score:z.coerce.number().min(0).max(5).default(0),count:z.coerce.number().int().min(0).max(1000000).default(0)}).strict();
+export const guestContentInput=z.object({appearance:appearanceInput.optional(),heroUrl:guestImage,rating:ratingInput.optional(),backgrounds:z.array(backgroundInput).max(20).default([]),recommendedItemIds:z.array(id).max(12).refine(ids=>new Set(ids).size===ids.length,'Choose each dish once.').default([]),events:z.array(z.object({id:z.uuid(),title:name,description:text,posterUrl:guestImage.refine(value=>Boolean(value),'Upload an event poster.'),active:z.boolean().default(true),startsAt:eventDate,endsAt:eventDate}).strict().refine(event=>!event.startsAt||!event.endsAt||event.endsAt>=event.startsAt,'The event end must follow its start.')).max(10).default([])}).strict().superRefine((content,ctx)=>{
   const eventIds=new Set(content.events.map(event=>event.id));
   if(eventIds.size!==content.events.length)ctx.addIssue({code:'custom',path:['events'],message:'Each event must have a unique ID.'});
   if(new Set(content.backgrounds.map(image=>image.id)).size!==content.backgrounds.length)ctx.addIssue({code:'custom',path:['backgrounds'],message:'Each background must have a unique ID.'});
   content.backgrounds.forEach((image,index)=>{if(image.eventId&&!eventIds.has(image.eventId))ctx.addIssue({code:'custom',path:['backgrounds',index,'eventId'],message:'Choose an event in this restaurant’s guest experience.'});});
 });
+export const cateringInquiryInput=z.object({
+  restaurantSlug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(3).max(80),
+  name: z.string().trim().min(1).max(120),
+  email: z.email().max(200),
+  phone: z.string().trim().max(40).default(''),
+  eventDate: z.union([z.literal(''),z.iso.date()]).default(''),
+  guestCount: z.coerce.number().int().min(0).max(100000).default(0),
+  message: z.string().trim().max(2000).default(''),
+}).strict();

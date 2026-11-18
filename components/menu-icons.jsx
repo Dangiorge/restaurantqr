@@ -23,6 +23,8 @@ export default function MenuIcon({name,size=22,...props}){
     check:<path d="m5 12 4 4L19 6"/>,
     clock:<><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
     pin:<><path d="M19 10c0 5-7 12-7 12S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/></>,
+    star:<path d="m12 3 2.6 5.7 6.2.6-4.7 4.2 1.4 6.1L12 16.8 6.5 19.6l1.4-6.1-4.7-4.2 6.2-.6Z"/>,
+    share:<><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8 15.8 6.2M8.2 13.2l7.6 4.6"/></>,
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>{paths[name]||paths.menu}</svg>;
 }

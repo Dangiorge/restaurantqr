@@ -1,0 +1,19 @@
+.rs-catering-overlay{position:fixed;inset:0;z-index:150;background:#000a;display:grid;place-items:center;padding:24px;backdrop-filter:blur(6px)}
+.rs-catering-modal{position:relative;width:min(520px,100%);max-height:90svh;overflow-y:auto;background:#fff;border-radius:22px;padding:40px 36px;box-shadow:0 30px 90px #0006}
+.rs-catering-close{position:absolute;top:18px;right:18px;width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#f4f1ec;border:0;color:#1f1512}
+.rs-catering-close:hover{background:#ece6dc}
+.rs-catering-modal .rs-eyebrow{font-size:10px;letter-spacing:1.8px;margin-bottom:12px}
+.rs-catering-modal h3{font-family:'Cormorant Garamond',Georgia,serif;font-size:36px;font-weight:600;letter-spacing:-.6px;margin:0 0 10px;color:#171717}
+.rs-catering-lead{font-size:13px;line-height:1.7;color:#716a61;margin:0 0 26px}
+.rs-catering-field{display:block;font-size:11px;font-weight:600;letter-spacing:.3px;color:#44403a;margin-bottom:16px}
+.rs-catering-field input,.rs-catering-field textarea{display:block;width:100%;margin-top:8px;border:1px solid #e4e0d8;border-radius:10px;background:#fafaf7;padding:12px 14px;font-size:13px;font-weight:400;color:#171717;font-family:inherit;resize:vertical}
+.rs-catering-field input:focus,.rs-catering-field textarea:focus{outline:2px solid var(--rs-red);outline-offset:1px}
+.rs-catering-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rs-catering-error{font-size:12px;color:var(--rs-red);margin:0 0 14px}
+.rs-catering-submit{width:100%;margin-top:6px;gap:24px;justify-content:center}
+.rs-catering-sent{text-align:center;padding:20px 0}
+.rs-catering-sent .rs-confirm-icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 18px;border-radius:50%;background:#1d7a3c1c;color:#2f9c52}
+.rs-catering-sent h3{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;margin:0 0 10px}
+.rs-catering-sent p{font-size:13px;line-height:1.7;color:#716a61;margin:0 0 24px}
+@media(max-width:600px){.rs-catering-modal{padding:32px 22px;border-radius:18px}.rs-catering-row{grid-template-columns:1fr}.rs-catering-modal h3{font-size:30px}}
+@media(prefers-reduced-motion:reduce){.rs-catering-overlay{backdrop-filter:none}}

@@ -37,14 +37,14 @@
 .rs-fall-cta{margin-top:35px}.rs-tastes .rs-taste{display:block;position:relative}.rs-tastes .rs-taste-image{border-radius:28px;box-shadow:0 18px 45px #00000015}
 .rs-tastes .rs-taste-image>span{top:18px;left:50%;transform:translateX(-50%);z-index:1}
 .rs-tastes .rs-taste h3{font-size:29px;font-weight:600;line-height:1.08;letter-spacing:-.6px}.rs-tastes .rs-taste>div:last-child{padding:19px 5px 4px;gap:15px}
-.rs-site[data-site-depth=scroll] .rs-fall-runway{height:190svh}
-.rs-site[data-site-depth=scroll] .rs-fall-pin{position:sticky;top:110px;height:calc(100svh - 130px);min-height:500px;max-height:920px;overflow:hidden;isolation:isolate;perspective:1450px;perspective-origin:50% 55%;border-radius:30px;background:radial-gradient(ellipse,#d4202809,transparent 70%)}
-.rs-site[data-site-depth=scroll] .rs-fall-orbit{display:block;position:absolute;left:20%;right:20%;top:4%;bottom:6%;border:1px solid #d4202830;border-radius:50%;transform:rotate(-25deg) scale(calc(.8 + var(--rs-dive)*.5));z-index:-2}
-.rs-site[data-site-depth=scroll] .rs-fall-orbit:before{content:'';position:absolute;inset:35px -60px;border:1px solid #d4202812;border-radius:50%}
+.rs-site[data-site-depth=scroll] .rs-fall-runway{height:190svh;width:100vw;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw)}
+.rs-site[data-site-depth=scroll] .rs-fall-pin{position:sticky;top:0;height:100svh;min-height:600px;max-height:none;overflow:hidden;isolation:isolate;perspective:1450px;perspective-origin:50% 55%;border-radius:0;background:radial-gradient(ellipse,#d4202809,transparent 70%)}
+.rs-site[data-site-depth=scroll] .rs-fall-orbit{display:block;position:absolute;left:20%;right:20%;top:4%;bottom:6%;border:1px solid #d4202830;border-radius:50%;transform:rotate(-25deg) scale(calc(.8 + var(--rs-dive)*.5));z-index:-2;mask-image:radial-gradient(circle,#000 72%,transparent 96%);-webkit-mask-image:radial-gradient(circle,#000 72%,transparent 96%)}
+.rs-site[data-site-depth=scroll] .rs-fall-orbit:before{content:'';position:absolute;inset:35px -20px;border:1px solid #d4202812;border-radius:50%;mask-image:radial-gradient(circle,#000 70%,transparent 94%);-webkit-mask-image:radial-gradient(circle,#000 70%,transparent 94%)}
 .rs-site[data-site-depth=scroll] .rs-fall-ghost{display:block;position:absolute;left:0;right:0;top:15%;text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-style:italic;font-size:clamp(130px,19vw,260px);letter-spacing:-8px;line-height:1;color:#d4202814;z-index:-1;transform:scale(calc(.7 + var(--rs-dive)*.8))}
-.rs-site[data-site-depth=scroll] .rs-fall-hint{position:absolute;top:15px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:15px;font-size:9px;letter-spacing:2px;color:#0008;z-index:10;opacity:calc(1 - var(--rs-dive))}
+.rs-site[data-site-depth=scroll] .rs-fall-hint{position:absolute;top:100px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:15px;font-size:9px;letter-spacing:2px;color:#0008;z-index:10;opacity:calc(1 - var(--rs-dive))}
 .rs-fall-hint>svg{transform:rotate(90deg)}
-.rs-site[data-site-depth=scroll] .rs-taste-grid{display:block;position:absolute;inset:0;perspective:inherit;transform-style:preserve-3d}
+.rs-site[data-site-depth=scroll] .rs-taste-grid{display:block;position:absolute;top:120px;bottom:0;left:0;right:0;width:min(1180px,88vw);margin:0 auto;perspective:inherit;transform-style:preserve-3d}
 .rs-site[data-site-depth=scroll] .rs-taste{position:absolute;width:31%;padding:0;opacity:1;background:#fff;border:1px solid #fff;border-radius:28px;box-shadow:0 18px 55px #0002;transform-origin:center;transition:box-shadow .3s}
 .rs-site[data-site-depth=scroll] .rs-taste:nth-child(1){left:2%;top:12%;z-index:3;transform:translate3d(calc(var(--rs-dive)*-65px),calc(85px - var(--rs-dive)*175px),calc(-260px + var(--rs-dive)*490px)) rotate(calc(-8deg + var(--rs-dive)*5deg))}
 .rs-site[data-site-depth=scroll] .rs-taste:nth-child(2){left:35%;top:14%;z-index:4;transform:translate3d(0,calc(145px - var(--rs-dive)*230px),calc(-360px + var(--rs-dive)*650px)) rotate(calc(7deg - var(--rs-dive)*9deg))}

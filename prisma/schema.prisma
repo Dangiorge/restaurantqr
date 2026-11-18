@@ -89,6 +89,22 @@ model Restaurant {
   menus Menu[]
   invitations Invitation[]
   audits AuditLog[]
+  cateringInquiries CateringInquiry[]
+}
+
+model CateringInquiry {
+  id String @id @default(cuid())
+  restaurantId String
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  name String
+  email String
+  phone String @default("")
+  eventDate DateTime?
+  guestCount Int @default(0)
+  message String @default("")
+  ip String @default("")
+  createdAt DateTime @default(now())
+  @@index([restaurantId, createdAt])
 }
 
 model RestaurantSettings {

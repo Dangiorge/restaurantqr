@@ -36,16 +36,17 @@ export async function overview(db, user, restaurantId) {
   const can = p => ctx.permissions.includes(p);
   const branches = await db.branch.findMany({ where: { restaurantId, ...branchFilter(ctx) }, orderBy: { name: 'asc' } });
   const branchIds = branches.map(b => b.id);
-  const [menus, tables, areas, roles, members, invitations] = await Promise.all([
+  const [menus, tables, areas, roles, members, invitations, cateringInquiries] = await Promise.all([
     can('menu.view') || can('menu.edit') ? db.menu.findMany({ where: { restaurantId }, include: { categories: { orderBy: { displayOrder: 'asc' }, include: { items: { orderBy: { displayOrder: 'asc' } } } } } }) : [],
     can('tables.manage') || can('qr.manage') ? db.diningTable.findMany({ where: { restaurantId, branchId: { in: branchIds } }, include: { qrCodes: { where: { revokedAt: null }, orderBy: { createdAt: 'desc' } } }, orderBy: { name: 'asc' } }) : [],
     can('tables.manage') ? db.diningArea.findMany({ where: { restaurantId, branchId: { in: branchIds } } }) : [],
     can('staff.manage') || can('roles.manage') ? db.role.findMany({ where: { restaurantId }, include: { permissions: true } }) : [],
     can('staff.manage') && ctx.branchIds === null ? db.membership.findMany({ where: { restaurantId }, include: { user: { select: { name: true, email: true } }, branches: true } }) : [],
     can('staff.manage') && ctx.branchIds === null ? db.invitation.findMany({ where: { restaurantId, acceptedAt: null, revokedAt: null }, select: { id: true, email: true, expiresAt: true } }) : [],
+    can('feedback.view') ? db.cateringInquiry.findMany({ where: { restaurantId }, orderBy: { createdAt: 'desc' }, take: 200 }) : [],
   ]);
   const restaurant = await db.restaurant.findUnique({ where: { id: restaurantId }, include: { settings: true } });
-  return { restaurant, branches, menus, tables, areas, roles, members, invitations, permissions: ctx.permissions, allBranches: ctx.branchIds === null, currentUserId: user.id };
+  return { restaurant, branches, menus, tables, areas, roles, members, invitations, cateringInquiries, permissions: ctx.permissions, allBranches: ctx.branchIds === null, currentUserId: user.id };
 }
 
 const resources = {
@@ -212,10 +213,10 @@ export async function acceptInvitation(db, user, raw) {
 
 export async function resolveQr(db, raw) {
   if (!/^[A-Za-z0-9_-]{43}$/.test(raw)) return null;
-  const qr = await db.qrCode.findFirst({ where: { token: raw, revokedAt: null, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }], table: { active: true, branch: { active: true, restaurant: { status: 'ACTIVE' } } } }, select: { table: { select: { name: true, branch: { select: { name: true, restaurant: { select: { id: true, slug: true, name: true, description: true, logoUrl: true, primaryColor: true, settings: { select: { currency: true, taxRate: true, serviceChargeRate: true, guestContent:true } } } } } } } } } });
+  const qr = await db.qrCode.findFirst({ where: { token: raw, revokedAt: null, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }], table: { active: true, branch: { active: true, restaurant: { status: 'ACTIVE' } } } }, select: { table: { select: { name: true, branch: { select: { name: true, timezone: true, openingHours: true, restaurant: { select: { id: true, slug: true, name: true, description: true, logoUrl: true, primaryColor: true, settings: { select: { currency: true, taxRate: true, serviceChargeRate: true, guestContent:true } } } } } } } } } });
   if (!qr) return null;
   const restaurant = qr.table.branch.restaurant;
   const menus = await db.menu.findMany({ where: { restaurantId: restaurant.id, active: true }, select:publicMenuSelect });
   const { id: _id, ...profile } = restaurant;
-  return { restaurant: profile, branch: qr.table.branch.name, table: qr.table.name, menus };
+  return { restaurant: profile, branch: qr.table.branch.name, table: qr.table.name, menus, openingHours: qr.table.branch.openingHours, timezone: qr.table.branch.timezone };
 }

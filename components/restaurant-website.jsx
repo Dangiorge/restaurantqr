@@ -2,11 +2,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import SiteHeader from './site-header';
 import SiteMotion from './site-motion';
-import BeerPour from './beer-pour';
 import CuisineJourney from './cuisine-journey';
 import RominaHistory from './romina-history';
 import RestaurantFilm from './restaurant-film';
+import HeroGallery from './hero-gallery';
+import PizzaFloat from './pizza-float';
+import PizzaSlice from './pizza-slice';
 import MenuIcon from './menu-icons';
+import CateringForm from './catering-form';
 import {websiteContent} from '@/modules/menus/website.mjs';
 
 const MEDIA='/media/romina/';
@@ -20,8 +23,6 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
   const {now,featured,categories,events}=websiteContent(restaurant,staticPreview?0:undefined);
   const branches=restaurant?.branches||[];
   const contactPhone=restaurant?.phone||branches.find(branch=>branch.phone)?.phone;
-  const cateringBranch=branches.find(branch=>/balder|embassy/i.test(branch.name));
-  const cateringPhone=cateringBranch?.phone||contactPhone;
   const seenPhotos=new Set();
 
   return <SiteMotion>
@@ -29,7 +30,11 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
     <SiteHeader/>
     <main id="main-content">
       <section className="rs-hero" aria-labelledby="site-hero-title">
-        <div className="rs-hero-photo"><Image src={`${MEDIA}sharing-platter.webp`} alt="A colourful traditional platter served on injera at Romina" fill priority unoptimized sizes="100vw"/></div>
+        <HeroGallery slides={[
+          {src:`${MEDIA}sharing-platter.webp`,alt:'A colourful traditional platter served on injera at Romina'},
+          {src:`${MEDIA}dining-room.webp`,alt:'A welcoming Romina dining room with tables and a banquette'},
+          {src:`${MEDIA}terrace.webp`,alt:'Outdoor tables under red Romina parasols'},
+        ]}/>
         <div className="rs-hero-shade"/>
         <div className="rs-hero-content" data-site-reveal="up">
           <span className="rs-eyebrow rs-light"><i/> ADDIS ABABA · SINCE 1973</span>
@@ -43,7 +48,7 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
 
       <RominaHistory/>
 
-      <div className="rs-marquee" aria-label="Good food. Great company. Since 1973."><div aria-hidden="true">{[0,1,2,3].map(copy=><span key={copy}>GOOD FOOD <i>✳</i> GREAT COMPANY <i>✳</i> SINCE 1973 <i>✳</i></span>)}</div></div>
+      <div className="rs-marquee" aria-label="Good food. Great company. Since 1973."><div aria-hidden="true">{[0,1,2,3].map(copy=><span key={copy}>GOOD FOOD <i>·</i> GREAT COMPANY <i>·</i> SINCE 1973 <i>·</i></span>)}</div></div>
 
       <section id="our-menu" className="rs-menu-section rs-section">
         <div className="rs-section-heading rs-menu-heading" data-site-reveal="up"><div><span className="rs-eyebrow">FROM OUR KITCHEN TO YOUR TABLE</span><h2>Your next<br/><em>craving.</em></h2><svg className="rs-craving-flourish" viewBox="0 0 320 45" fill="none" aria-hidden="true"><path d="M5 26C66 3 239 2 310 16C324 21 220 38 158 33" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg></div><div><span className="rs-menu-handwriting">A little temptation.</span><p>Fresh from our kitchen.<br/>Find the dish that calls your name.</p><Link href="/menu?view=menu" className="rs-link">Explore the full menu<Arrow size={17}/></Link></div></div>
@@ -69,6 +74,9 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
         </div>
       </section>
 
+      <PizzaFloat/>
+      <PizzaSlice/>
+
       <section id="experience" className="rs-tastes rs-section" aria-labelledby="tastes-title">
         <div className="rs-section-heading" data-site-reveal="up"><div><span className="rs-eyebrow">A TABLE FOR EVERY APPETITE</span><h2 id="tastes-title">More to<br/><em>fall for.</em></h2></div><p>Something comforting. Something sizzling. Something you’ll come back for.</p></div>
         <div className="rs-fall-runway" data-site-dive><div className="rs-fall-pin"><div className="rs-fall-orbit" aria-hidden="true"/><span className="rs-fall-ghost" aria-hidden="true">give in.</span><span className="rs-fall-hint" aria-hidden="true">SCROLL A LITTLE. FALL A LITTLE.<Arrow size={16}/></span><div className="rs-taste-grid">{[
@@ -83,10 +91,8 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
         <div className="rs-coffee-film" data-site-reveal="right"><RestaurantFilm src={`${MEDIA}coffee-ritual.mp4`} poster={`${MEDIA}coffee-ritual-poster.webp`} alt="Coffee being prepared at the Romina espresso machine" title="The coffee ritual" portrait/></div>
       </section>
 
-      <BeerPour dish={featured.find(dish=>/grill|tibs|steak|filet|fillet/i.test(dish.name))||featured[0]}/>
-
       <section id="catering" className="rs-gather rs-section">
-        <div className="rs-gather-copy" data-site-reveal="left"><span className="rs-eyebrow">BALDERACE · NEAR THE BRITISH EMBASSY</span><h2>Big days.<br/><em>Beautiful food.</em></h2><p className="rs-lead">Weddings. Graduations. A table for everyone.</p><p>Our Balderace branch is known for bringing people together over food. Let Romina be part of your next celebration.</p><ul className="rs-occasion-tags" aria-label="Catering occasions"><li>Weddings</li><li>Graduations</li><li>Celebrations</li><li>Corporate events</li></ul><div className="rs-catering-actions"><a href={cateringPhone?phoneHref(cateringPhone):'#visit'} className="rs-button">Plan your catering<Arrow size={17}/></a><a href="https://www.google.com/maps/search/?api=1&query=Romina%20Balderace%20British%20Embassy%20Addis%20Ababa" className="rs-link" target="_blank" rel="noreferrer">Find Balderace<Arrow size={17}/></a></div></div>
+        <div className="rs-gather-copy" data-site-reveal="left"><span className="rs-eyebrow">BALDERACE · NEAR THE BRITISH EMBASSY</span><h2>Big days.<br/><em>Beautiful food.</em></h2><p className="rs-lead">Weddings. Graduations. A table for everyone.</p><p>Our Balderace branch is known for bringing people together over food. Let Romina be part of your next celebration.</p><ul className="rs-occasion-tags" aria-label="Catering occasions"><li>Weddings</li><li>Graduations</li><li>Celebrations</li><li>Corporate events</li></ul><div className="rs-catering-actions"><CateringForm restaurantSlug={restaurant?.slug}/><a href="https://www.google.com/maps/search/?api=1&query=Romina%20Balderace%20British%20Embassy%20Addis%20Ababa" className="rs-link" target="_blank" rel="noreferrer">Find Balderace<Arrow size={17}/></a></div></div>
         <div className="rs-gather-photo" data-site-parallax><Image src={`${MEDIA}terrace.webp`} alt="Outdoor tables under red Romina parasols" fill unoptimized sizes="(max-width:760px) 90vw, 50vw"/><span>SPACE FOR GOOD COMPANY.</span></div>
       </section>
 
