@@ -4,13 +4,6 @@ import MenuIcon from './menu-icons';
 import RominaThread from './romina-thread';
 
 const MEDIA='/media/romina/';
-const milestones=[
-  ['2009','Romina Coffee','Ethiopian coffee finds a wider world.'],
-  ['2017','Jaquar World','A new chapter in international trading.'],
-  ['2020','KOBA','Patisserie, bakery and the craft of making.'],
-  ['2021','Bacio Cremeria','Handcrafted gelato joins the family.'],
-  ['2026','KOBA Peacock','A new milestone in coffee roasting.'],
-];
 
 function Chapter({number,children,light=false}){
   return <div className={`rh-chapter${light?' rh-chapter-light':''}`}><span>{number}</span><span>{children}</span><i/></div>;
@@ -48,11 +41,6 @@ export default function RominaHistory(){
         <p className="rh-family-note">Robel, Michael and Naod. Their names inspired Romina.<br/>After studying abroad, Girma Taye’s sons returned home<br className="rh-desktop-break"/> to help carry the family business forward.</p>
         <span className="rh-family-rule" aria-hidden="true"/>
       </div>
-    </section>
-
-    <section className="rh-growth" aria-labelledby="history-growth-title">
-      <div className="rh-growth-heading" data-history-reveal><span className="rh-kicker">FROM ONE RESTAURANT, NEW POSSIBILITIES.</span><h2 id="history-growth-title">The family<br/><em>grew.</em></h2><p>New names. New chapters.<br/>The same roots.</p></div>
-      <ol className="rh-timeline">{milestones.map(([year,name,description],index)=><li key={year} data-history-reveal style={{'--history-delay':`${index*65}ms`}}><span className="rh-milestone-year">{year}</span><i aria-hidden="true"/><h3>{name}</h3><p>{description}</p></li>)}</ol>
     </section>
 
     <section id="history-homecoming" className="rh-homecoming" data-history-scene="homecoming" aria-labelledby="history-homecoming-title">
