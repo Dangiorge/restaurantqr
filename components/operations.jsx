@@ -1,4 +1,5 @@
 "use client";
+import '@/app/guest-menu.css';
 import {useEffect,useState} from 'react';
 import MenuIcon from './menu-icons';
 

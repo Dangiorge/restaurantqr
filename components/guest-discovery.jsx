@@ -4,6 +4,7 @@ import {useEffect,useState} from 'react';
 import Image from 'next/image';
 import MenuIcon from './menu-icons';
 import DishPhoto from './dish-photo';
+import {imageProps} from '@/lib/image.mjs';
 import useEntrance from './use-entrance';
 
 function multiline(text){
@@ -33,7 +34,7 @@ function HeroMedia({gallery,name}){
     const active=i===index;
     return isVideo(src)
       ?<video key={src} className={`rg-welcome-image rg-hero-slide ${active?'rg-hero-active':''} ${!reduced?'rg-hero-pan':''}`} src={src} autoPlay muted loop playsInline/>
-      :<Image key={src} className={`rg-welcome-image rg-hero-slide ${active?'rg-hero-active':''} ${!reduced?'rg-hero-pan':''}`} src={src} alt={active?`${name} dining room`:''} fill unoptimized priority={i===0} sizes="100vw"/>;
+      :<Image key={src} className={`rg-welcome-image rg-hero-slide ${active?'rg-hero-active':''} ${!reduced?'rg-hero-pan':''}`} {...imageProps(src,2000)} alt={active?`${name} dining room`:''} fill priority={i===0} sizes="100vw"/>;
   })}</div>;
 }
 
@@ -52,7 +53,7 @@ export function GuestWelcome({name,logo,hero,gallery,table,branch,enter,logoRef,
         <button className="rg-share-button" onClick={onShare} aria-label={t('shareMenu','Share menu')}><MenuIcon name={shared?'check':'share'} size={16}/></button>
       </div>
     </div>
-    <div className="rg-welcome-content"><div className="rg-welcome-logo" ref={logoRef}>{logo?<Image src={logo} alt={name} width={196} height={196} unoptimized priority/>:<strong>{name}</strong>}</div><span className="rg-kicker">GOOD FOOD. GREAT COMPANY.</span><h1>{multiline(t('welcomeTitle','A warm welcome.\nAn unforgettable meal.'))}</h1>{showRating&&<span className="rg-rating" aria-label={ratingLabel}><MenuIcon name="star" size={14}/>{rating.score.toFixed(1)}{rating.count>0&&<small>{`(${rating.count})`}</small>}</span>}<p>{multiline(t('welcomeSubtitle','Find your favourites. Discover something delicious.\nMake yourself at home.'))}</p>{table&&<span className="rg-table"><MenuIcon name="pin" size={16}/>{branch} · Table {table}</span>}<button className="rg-enter" onClick={enter}><MenuIcon name="cutlery" size={20}/>{t('viewMenu','View Menu')}<MenuIcon name="arrow" size={20}/></button><span className="rg-welcome-footnote">{table?t('footnoteTable','Your table. Your menu. All at your fingertips.'):t('footnoteScan','Scan the QR at your table to order and request service.')}</span></div><div className="rg-welcome-pattern" aria-hidden="true"/>
+    <div className="rg-welcome-content"><div className="rg-welcome-logo" ref={logoRef}>{logo?<Image {...imageProps(logo,400)} alt={name} width={196} height={196} priority/>:<strong>{name}</strong>}</div><span className="rg-kicker">GOOD FOOD. GREAT COMPANY.</span><h1>{multiline(t('welcomeTitle','A warm welcome.\nAn unforgettable meal.'))}</h1>{showRating&&<span className="rg-rating" aria-label={ratingLabel}><MenuIcon name="star" size={14}/>{rating.score.toFixed(1)}{rating.count>0&&<small>{`(${rating.count})`}</small>}</span>}<p>{multiline(t('welcomeSubtitle','Find your favourites. Discover something delicious.\nMake yourself at home.'))}</p>{table&&<span className="rg-table"><MenuIcon name="pin" size={16}/>{branch} · Table {table}</span>}<button className="rg-enter" onClick={enter}><MenuIcon name="cutlery" size={20}/>{t('viewMenu','View Menu')}<MenuIcon name="arrow" size={20}/></button><span className="rg-welcome-footnote">{table?t('footnoteTable','Your table. Your menu. All at your fingertips.'):t('footnoteScan','Scan the QR at your table to order and request service.')}</span></div><div className="rg-welcome-pattern" aria-hidden="true"/>
   </section>;
 }
 
@@ -77,7 +78,7 @@ export function RecommendationSlider({items,recommended,open,t=k=>k}){
 
 export function GuestEvents({events,t=k=>k}){
   if(!events.length)return null;
-  return <section className="rg-events" aria-label="Events"><div className="rg-section-heading"><div><span className="rg-kicker">MAKE A DATE WITH US</span><h2>{t('happeningAtOurTable','Happening at our table')}</h2></div></div>{events.map(event=><article key={event.id}><Image src={event.posterUrl} alt={`${event.title} poster`} width={1000} height={700} unoptimized/><div><h3>{event.title}</h3><p>{event.description}</p></div></article>)}</section>;
+  return <section className="rg-events" aria-label="Events"><div className="rg-section-heading"><div><span className="rg-kicker">MAKE A DATE WITH US</span><h2>{t('happeningAtOurTable','Happening at our table')}</h2></div></div>{events.map(event=><article key={event.id}><Image {...imageProps(event.posterUrl,1400)} alt={`${event.title} poster`} width={1000} height={700} sizes="(max-width:760px) 92vw, 1000px"/><div><h3>{event.title}</h3><p>{event.description}</p></div></article>)}</section>;
 }
 
 export function ParentCategories({categories,allCategories,select,t=k=>k}){
@@ -86,6 +87,6 @@ export function ParentCategories({categories,allCategories,select,t=k=>k}){
     const children=allCategories.filter(child=>child.parentId===category.id);
     const dishes=[...category.items,...children.flatMap(child=>child.items)];
     const photo=dishes.find(item=>item.photoUrl)?.photoUrl;
-    return <button className="rg-parent-card" key={category.id} data-enter="category" style={{'--rg-enter-delay':`${Math.min(index*75,750)}ms`}} onClick={()=>select(category.id)}>{photo?<Image src={photo} alt="" width={140} height={140} unoptimized/>:<span className="rg-category-placeholder"><MenuIcon name="cutlery" size={30}/></span>}<span><strong>{category.name}</strong><small>{children.length?children.map(child=>child.name).join(' · '):`${dishes.length} ${dishes.length===1?'dish':'dishes'} to discover`}</small></span><MenuIcon name="arrow" size={20}/></button>;
+    return <button className="rg-parent-card" key={category.id} data-enter="category" style={{'--rg-enter-delay':`${Math.min(index*75,750)}ms`}} onClick={()=>select(category.id)}>{photo?<Image {...imageProps(photo,300)} alt="" width={140} height={140}/>:<span className="rg-category-placeholder"><MenuIcon name="cutlery" size={30}/></span>}<span><strong>{category.name}</strong><small>{children.length?children.map(child=>child.name).join(' · '):`${dishes.length} ${dishes.length===1?'dish':'dishes'} to discover`}</small></span><MenuIcon name="arrow" size={20}/></button>;
   })}</div></section>;
 }

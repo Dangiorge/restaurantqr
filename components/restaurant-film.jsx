@@ -36,7 +36,7 @@ export default function RestaurantFilm({src,poster,alt,title,portrait=false}){
     return()=>{disposed=true;nearby.disconnect();onscreen.disconnect();film.pause();preference.removeEventListener('change',sync);connection?.removeEventListener('change',sync);document.removeEventListener('visibilitychange',sync);film.removeEventListener('playing',played);film.removeEventListener('pause',stopped);film.removeEventListener('error',failed);};
   },[src,globalPause,held]);
   return <figure ref={root} className={`rs-film${portrait?' rs-film-portrait':''}`} data-playing="false" data-still="true">
-    <Image src={poster} alt={alt} fill unoptimized sizes={portrait?'(max-width:760px) 80vw, 440px':'(max-width:760px) 100vw, 1280px'}/>
+    <Image src={poster} alt={alt} fill sizes={portrait?'(max-width:760px) 80vw, 440px':'(max-width:760px) 100vw, 1280px'}/>
     <video ref={video} muted playsInline loop preload="none" aria-hidden="true" tabIndex={-1}/>
     <figcaption><span>{title}</span><button type="button" onClick={()=>{if(playing){setHeld(true);video.current.pause();}else{setHeld(false);video.current.play().catch(()=>{});}}} aria-label={`${playing?'Pause':'Play'} ${title.toLowerCase()} film`} aria-pressed={held} disabled={globalPause}><MenuIcon name={playing?'pause':'play'} size={16}/></button></figcaption>
   </figure>;

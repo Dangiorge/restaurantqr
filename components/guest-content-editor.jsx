@@ -1,5 +1,6 @@
 "use client";
 
+import '@/app/guest-discovery.css';
 import {useState} from 'react';
 import UploadField from './upload-field';
 import BackgroundLibrary from './background-library';

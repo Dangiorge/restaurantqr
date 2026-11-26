@@ -1,5 +1,6 @@
 "use client";
 
+import '@/app/romina-thread.css';
 import {Children,cloneElement,useEffect,useRef} from 'react';
 import {useSiteMotionPaused} from './site-motion';
 import MenuIcon from './menu-icons';

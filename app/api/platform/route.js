@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { revalidateTag } from 'next/cache';
+import { PUBLIC_SITE_TAG } from '@/modules/menus/public-cache.mjs';
 import { database } from '@/lib/db.mjs';
 import { body, currentUser, HttpError, respond, sameOrigin } from '@/lib/http.mjs';
 
@@ -19,6 +21,7 @@ export function PATCH(request) {
       await tx.restaurant.update({ where: { id: data.id }, data: { status: data.status } });
       await tx.auditLog.create({ data: { restaurantId: data.id, actorId: user.id, action: `platform.restaurant.${data.status.toLowerCase()}`, entityId: data.id } });
     });
+    revalidateTag(PUBLIC_SITE_TAG, { expire: 0 });
     return { ok: true };
   });
 }

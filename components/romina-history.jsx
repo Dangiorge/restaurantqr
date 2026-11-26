@@ -1,3 +1,4 @@
+import '@/app/romina-history.css';
 import Image from 'next/image';
 import HistoryMotion from './history-motion';
 import MenuIcon from './menu-icons';
@@ -14,7 +15,7 @@ export default function RominaHistory(){
     <section id="history-beginnings" className="rh-opening" data-history-scene="opening" aria-labelledby="history-opening-title">
       <div className="rh-opening-pin">
         <div className="rh-opening-frame">
-          <Image src={`${MEDIA}story-dining.webp`} alt="The tables and pendant lights of a Romina dining room today" fill unoptimized sizes="100vw"/>
+          <Image src={`${MEDIA}story-dining.webp`} alt="The tables and pendant lights of a Romina dining room today" fill sizes="100vw"/>
           <div className="rh-shutter" data-history-reveal aria-hidden="true">{Array.from({length:8},(_,index)=><i key={index} style={{'--slat':index}}/>)}</div>
         </div>
         <span className="rh-opening-edge" aria-hidden="true"/>
@@ -44,7 +45,7 @@ export default function RominaHistory(){
     </section>
 
     <section id="history-homecoming" className="rh-homecoming" data-history-scene="homecoming" aria-labelledby="history-homecoming-title">
-      <div className="rh-home-photo"><Image src={`${MEDIA}arrival-poster.webp`} alt="A present-day Romina restaurant entrance" fill unoptimized sizes="100vw"/></div>
+      <div className="rh-home-photo"><Image src={`${MEDIA}arrival-poster.webp`} alt="A present-day Romina restaurant entrance" fill sizes="100vw"/></div>
       <div className="rh-home-shade" aria-hidden="true"/>
       <div className="rh-home-door rh-home-door-left" aria-hidden="true"/><div className="rh-home-door rh-home-door-right" aria-hidden="true"/>
       <div className="rh-home-top"><Chapter number="03" light>THE NEXT CHAPTER</Chapter><span className="rh-edition">4 KILO<br/>OPEN AGAIN.</span></div>

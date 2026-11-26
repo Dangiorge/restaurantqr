@@ -1,10 +1,12 @@
 "use client";
 
+import '@/app/cuisine-atlas.css';
 import Image from 'next/image';
 import Link from 'next/link';
 import {useEffect,useRef} from 'react';
 import {useSiteMotionPaused} from './site-motion';
 import MenuIcon from './menu-icons';
+import {imageProps} from '@/lib/image.mjs';
 
 const clamp=value=>Math.max(0,Math.min(1,value));
 const ease=value=>value*value*(3-2*value);
@@ -146,7 +148,7 @@ export default function CuisineAtlas({stops,map}){
       <div className="rs-atlas-destinations">{stops.map((stop,index)=><article key={stop.id} id={`cuisine-${stop.id}`} className="rs-atlas-destination" data-cuisine={stop.id} aria-labelledby={`cuisine-${stop.id}-title`}>
         <div className="rs-atlas-place"><span className="rs-atlas-stop-number">0{index+1} / A TASTE OF {stop.place.toUpperCase()}</span><h3 id={`cuisine-${stop.id}-title`}>{stop.place}<span>.</span></h3><p>{stop.line}</p><span className="rs-atlas-coordinates" aria-hidden="true">{stop.coordinates}</span></div>
         <div className="rs-atlas-cards"><div className="rs-atlas-food-rail">{stop.dishes.map((dish,dishIndex)=><Link key={dish.id} href={`/menu?dish=${encodeURIComponent(dish.id)}`} className="rs-atlas-card" style={{'--card-index':dishIndex}}>
-          <div className="rs-atlas-food">{dish.photoUrl?<Image src={dish.photoUrl} alt={dish.name} fill unoptimized sizes="(max-width:760px) 180px, 350px" loading="lazy"/>:<span className="rs-atlas-food-fallback"><MenuIcon name="cutlery" size={32}/></span>}{dish.dietaryType==='VEGAN'&&<span className="rs-atlas-vegan">Vegan</span>}</div>
+          <div className="rs-atlas-food">{dish.photoUrl?<Image {...imageProps(dish.photoUrl,720)} alt={dish.name} fill sizes="(max-width:760px) 180px, 350px" loading="lazy"/>:<span className="rs-atlas-food-fallback"><MenuIcon name="cutlery" size={32}/></span>}{dish.dietaryType==='VEGAN'&&<span className="rs-atlas-vegan">Vegan</span>}</div>
           <div className="rs-atlas-card-copy"><span className="rs-atlas-cuisine-label">{stop.name}</span><h4>{dish.name}</h4><div><strong>{formatPrice(dish.basePrice)} <small>ETB</small></strong><span className="rs-atlas-discover" aria-label={`Discover ${dish.name}`}><MenuIcon name="arrow" size={19}/></span></div></div>
         </Link>)}
         {!stop.dishes.length&&<div className="rs-atlas-empty rs-atlas-card"><MenuIcon name="cutlery" size={30}/><p>{stop.description}</p><span>Ask our team for today’s {stop.name.toLowerCase()} favourites.</span></div>}

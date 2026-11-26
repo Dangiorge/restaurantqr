@@ -1,39 +1,28 @@
-import '@fontsource/poppins/400.css';
-import '@fontsource/poppins/600.css';
-import '@fontsource/poppins/700.css';
-import '@fontsource/cormorant-garamond/500.css';
-import '@fontsource/cormorant-garamond/600.css';
-import '@fontsource/cormorant-garamond/500-italic.css';
-import '@fontsource/cormorant-garamond/600-italic.css';
-import '@fontsource/manrope/400.css';
-import '@fontsource/manrope/500.css';
-import '@fontsource/manrope/600.css';
+import {preload} from 'react-dom';
+import './fonts.css';
 import "./globals.css";
-import './romina.css';
-import './guest-menu.css';
-import './brand-intro.css';
-import './guest-discovery.css';
-import './guest-actions.css';
-import './guest-appearance.css';
-import './guest-dishes.css';
-import './restaurant-site.css';
-import './catering-form.css';
-import './pizza-iris.css';
-import './pizza-slice.css';
-import './cuisine-atlas.css';
-import './romina-history.css';
-import './romina-thread.css';
-import './restaurant-art.css';
+import {appOrigin} from '@/lib/app-origin.mjs';
+
+// Page-specific stylesheets are imported by the components that use them, so each
+// route only downloads its own CSS. The faces below appear above the fold.
+const criticalFonts=['cormorant-garamond-latin-500-normal','cormorant-garamond-latin-500-italic','poppins-latin-400-normal','poppins-latin-600-normal'];
+
+function siteOrigin(){
+  try{return new URL(appOrigin());}catch{return undefined;}
+}
 
 export const metadata = {
+  metadataBase: siteOrigin(),
   title: "Tableline · Restaurant workspace",
   description: "Manage your restaurant branches, menus, tables, and QR codes in one workspace.",
 };
 
 export default function RootLayout({ children }) {
+  for(const font of criticalFonts)preload(`/fonts/${font}.woff2`,{as:'font',type:'font/woff2',crossOrigin:'anonymous'});
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col">{children}</body>

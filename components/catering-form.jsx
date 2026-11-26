@@ -1,5 +1,6 @@
 "use client";
 
+import '@/app/catering-form.css';
 import {useEffect,useRef,useState} from 'react';
 import MenuIcon from './menu-icons';
 

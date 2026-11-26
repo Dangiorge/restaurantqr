@@ -1,3 +1,4 @@
+import '@/app/restaurant-site.css';
 import Image from 'next/image';
 import Link from 'next/link';
 import SiteHeader from './site-header';
@@ -10,6 +11,8 @@ import PizzaIris from './pizza-iris';
 import PizzaSlice from './pizza-slice';
 import MenuIcon from './menu-icons';
 import CateringForm from './catering-form';
+import {imageProps} from '@/lib/image.mjs';
+import '@/app/restaurant-art.css';
 import {websiteContent} from '@/modules/menus/website.mjs';
 
 const MEDIA='/media/romina/';
@@ -19,8 +22,8 @@ const money=value=>Number(value).toLocaleString('en-ET',{minimumFractionDigits:2
 const dishLink=id=>`/menu?dish=${encodeURIComponent(id)}`;
 function Arrow({size=19}){return <MenuIcon name="arrow" size={size}/>;}
 
-export default function RestaurantWebsite({restaurant,staticPreview=false}){
-  const {now,featured,categories,events}=websiteContent(restaurant,staticPreview?0:undefined);
+export default function RestaurantWebsite({restaurant,now:renderedAt,staticPreview=false}){
+  const {now,featured,categories,events}=websiteContent(restaurant,staticPreview?0:renderedAt);
   const branches=restaurant?.branches||[];
   const contactPhone=restaurant?.phone||branches.find(branch=>branch.phone)?.phone;
   const seenPhotos=new Set();
@@ -30,7 +33,7 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
     <SiteHeader/>
     <main id="main-content">
       <section className="rs-hero" aria-labelledby="site-hero-title">
-        <HeroGallery slides={[{src:'/herobackground.jpg',alt:'A plated steak with mashed potatoes and vegetables, with wine and bread on a Romina table'}]}/>
+        <HeroGallery slides={[{src:'/media/romina/hero-table.webp',alt:'A plated steak with mashed potatoes and vegetables, with wine and bread on a Romina table'}]}/>
         <div className="rs-hero-shade"/>
         <div className="rs-hero-content" data-site-reveal="up">
           <span className="rs-eyebrow rs-light"><i/> ADDIS ABABA · SINCE 1973</span>
@@ -52,7 +55,7 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
           const showPhoto=dish.photoUrl&&!seenPhotos.has(dish.photoUrl);
           if(showPhoto)seenPhotos.add(dish.photoUrl);
           return <Link key={dish.id} href={dishLink(dish.id)} className="rs-food-card" data-site-reveal="up" data-site-parallax style={{'--rs-delay':`${Math.min(index*100,500)}ms`}}>
-            <div className="rs-food-card-image">{showPhoto?<Image src={dish.photoUrl} alt={dish.name} fill unoptimized sizes="(max-width:600px) 90vw, (max-width:1000px) 45vw, 420px"/>:<span className="rs-food-fallback"><MenuIcon name="cutlery" size={35}/></span>}<span className="rs-food-number">{String(index+1).padStart(2,'0')}</span><span className="rs-food-open">View dish<Arrow size={17}/></span>{dish.dietaryType==='VEGAN'&&<span className="rs-food-vegan">Vegan</span>}</div>
+            <div className="rs-food-card-image">{showPhoto?<Image {...imageProps(dish.photoUrl,900)} alt={dish.name} fill sizes="(max-width:600px) 90vw, (max-width:1000px) 45vw, 420px"/>:<span className="rs-food-fallback"><MenuIcon name="cutlery" size={35}/></span>}<span className="rs-food-number">{String(index+1).padStart(2,'0')}</span><span className="rs-food-open">View dish<Arrow size={17}/></span>{dish.dietaryType==='VEGAN'&&<span className="rs-food-vegan">Vegan</span>}</div>
             <div className="rs-food-card-copy"><span className="rs-eyebrow">{dish.categoryName}</span><h3>{dish.name.trim().replace(/[,;]+$/,'')}</h3><div className="rs-food-card-price"><strong>{money(dish.basePrice)} <small>ETB</small></strong><span>Discover<Arrow size={16}/></span></div></div>
           </Link>;
         })}</div>
@@ -80,7 +83,7 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
           ['fish-cream','Fish with creamy mushroom sauce and lime','Comfort, on a plate.','01'],
           ['pasta','Pasta served at Romina','One more forkful.','02'],
           ['grill','Grilled meat served with fries and vegetables','Straight to your favourites.','03'],
-        ].map(([photo,alt,title,number],index)=><Link key={photo} href="/menu?view=menu" className="rs-taste" data-site-reveal="right" style={{'--rs-delay':`${index*100}ms`,'--fall-index':index}}><div className="rs-taste-image" data-site-parallax><Image src={`${MEDIA}${photo}.webp`} alt={alt} fill unoptimized sizes="(max-width:760px) 90vw, 45vw"/><span>{number}</span></div><div><h3>{title}</h3><Arrow size={21}/></div></Link>)}</div><Link className="rs-fall-cta rs-button" href="/menu?view=menu">Find your favourite<Arrow size={18}/></Link></div></div>
+        ].map(([photo,alt,title,number],index)=><Link key={photo} href="/menu?view=menu" className="rs-taste" data-site-reveal="right" style={{'--rs-delay':`${index*100}ms`,'--fall-index':index}}><div className="rs-taste-image" data-site-parallax><Image src={`${MEDIA}${photo}.webp`} alt={alt} fill sizes="(max-width:760px) 90vw, 45vw"/><span>{number}</span></div><div><h3>{title}</h3><Arrow size={21}/></div></Link>)}</div><Link className="rs-fall-cta rs-button" href="/menu?view=menu">Find your favourite<Arrow size={18}/></Link></div></div>
       </section>
 
       <section className="rs-coffee rs-section" aria-labelledby="coffee-title">
@@ -90,14 +93,14 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
 
       <section id="catering" className="rs-gather rs-section">
         <div className="rs-gather-copy" data-site-reveal="left"><span className="rs-eyebrow">BALDERACE · NEAR THE BRITISH EMBASSY</span><h2>Big days.<br/><em>Beautiful food.</em></h2><p className="rs-lead">Weddings. Graduations. A table for everyone.</p><p>Our Balderace branch is known for bringing people together over food. Let Romina be part of your next celebration.</p><ul className="rs-occasion-tags" aria-label="Catering occasions"><li>Weddings</li><li>Graduations</li><li>Celebrations</li><li>Corporate events</li></ul><div className="rs-catering-actions"><CateringForm restaurantSlug={restaurant?.slug}/><a href="https://www.google.com/maps/search/?api=1&query=Romina%20Balderace%20British%20Embassy%20Addis%20Ababa" className="rs-link" target="_blank" rel="noreferrer">Find Balderace<Arrow size={17}/></a></div></div>
-        <div className="rs-gather-photo" data-site-parallax><Image src={`${MEDIA}terrace.webp`} alt="Outdoor tables under red Romina parasols" fill unoptimized sizes="(max-width:760px) 90vw, 50vw"/><span>SPACE FOR GOOD COMPANY.</span></div>
+        <div className="rs-gather-photo" data-site-parallax><Image src={`${MEDIA}terrace.webp`} alt="Outdoor tables under red Romina parasols" fill sizes="(max-width:760px) 90vw, 50vw"/><span>SPACE FOR GOOD COMPANY.</span></div>
       </section>
 
-      {events.length>0&&<section className="rs-events rs-section" aria-label="Events at Romina"><div className="rs-section-heading" data-site-reveal="up"><div><span className="rs-eyebrow">SAVE THE DATE</span><h2>Happening<br/><em>at Romina.</em></h2></div></div><div className="rs-event-grid">{events.map(event=><article key={event.id} data-site-reveal="up"><Image src={event.posterUrl} alt={`${event.title} poster`} width={1000} height={700} unoptimized/><div>{event.startsAt&&<span className="rs-eyebrow">{new Intl.DateTimeFormat('en',{dateStyle:'long',timeZone:'Africa/Addis_Ababa'}).format(new Date(event.startsAt))}</span>}<h3>{event.title}</h3><p>{event.description}</p><a href="#visit" className="rs-link">Join us<Arrow size={16}/></a></div></article>)}</div></section>}
+      {events.length>0&&<section className="rs-events rs-section" aria-label="Events at Romina"><div className="rs-section-heading" data-site-reveal="up"><div><span className="rs-eyebrow">SAVE THE DATE</span><h2>Happening<br/><em>at Romina.</em></h2></div></div><div className="rs-event-grid">{events.map(event=><article key={event.id} data-site-reveal="up"><Image {...imageProps(event.posterUrl,1200)} alt={`${event.title} poster`} width={1000} height={700} sizes="(max-width:760px) 90vw, 600px"/><div>{event.startsAt&&<span className="rs-eyebrow">{new Intl.DateTimeFormat('en',{dateStyle:'long',timeZone:'Africa/Addis_Ababa'}).format(new Date(event.startsAt))}</span>}<h3>{event.title}</h3><p>{event.description}</p><a href="#visit" className="rs-link">Join us<Arrow size={16}/></a></div></article>)}</div></section>}
 
       <section id="visit" className="rs-visit">
         <div className="rs-section"><div className="rs-section-heading" data-site-reveal="up"><div><span className="rs-eyebrow">YOUR NEXT FAVOURITE PLACE</span><h2>Meet us<br/><em>at Romina.</em></h2></div><p>A quick lunch. A long catch-up.<br/>There’s a table for that.</p></div>
-          <div className="rs-visit-scenes"><RestaurantFilm src={`${MEDIA}arrival.mp4`} poster={`${MEDIA}arrival-poster.webp`} alt="The exterior of a Romina restaurant" title="Welcome to Romina"/><div className="rs-visit-interior" data-site-parallax><Image src={`${MEDIA}dining-room.webp`} alt="A welcoming Romina dining room with tables and a banquette" fill unoptimized sizes="(max-width:760px) 90vw, 420px"/><span>MAKE YOURSELF AT HOME.</span></div></div>
+          <div className="rs-visit-scenes"><RestaurantFilm src={`${MEDIA}arrival.mp4`} poster={`${MEDIA}arrival-poster.webp`} alt="The exterior of a Romina restaurant" title="Welcome to Romina"/><div className="rs-visit-interior" data-site-parallax><Image src={`${MEDIA}dining-room.webp`} alt="A welcoming Romina dining room with tables and a banquette" fill sizes="(max-width:760px) 90vw, 420px"/><span>MAKE YOURSELF AT HOME.</span></div></div>
           <div className="rs-location-grid">{branches.map((branch,index)=><article key={branch.name} data-site-reveal="up"><span className="rs-location-number">{String(index+1).padStart(2,'0')}</span><MenuIcon name="pin" size={23}/><h3>{branch.name}</h3><p>{branch.address||'Please contact our team for directions.'}</p>{branch.phone&&<a className="rs-location-phone" href={phoneHref(branch.phone)}>{branch.phone}</a>}{branch.address&&<a className="rs-link" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${branch.name} ${branch.address}`)}`} target="_blank" rel="noreferrer">Get directions<Arrow size={16}/></a>}{Object.keys(branch.openingHours||{}).length>0&&<details><summary>Opening hours<MenuIcon name="plus" size={15}/></summary><dl>{days.map(([key,label])=><div key={key}><dt>{label}</dt><dd>{branch.openingHours[key]==='closed'?'Closed':branch.openingHours[key]?.replace('-', ' – ')||'Contact branch'}</dd></div>)}</dl><small>Times shown in {branch.timezone||'Africa/Addis_Ababa'}.</small></details>}</article>)}</div>
           {!branches.length&&<div className="rs-location-empty" data-site-reveal="up"><h3>Your table is waiting.</h3><p>{restaurant?.address||'Please contact our team for branch details and directions.'}</p>{contactPhone&&<a className="rs-link" href={phoneHref(contactPhone)}>Call Romina<Arrow size={17}/></a>}</div>}
         </div>

@@ -7,7 +7,7 @@ const base='http://localhost:3114';
 const server=spawn(process.execPath,['node_modules/next/dist/bin/next','start','-p','3114'],{env:{...process.env,BETTER_AUTH_URL:base},windowsHide:true,stdio:'ignore'});
 let browser;
 try{
-  for(const file of ['app/restaurant-site.css','app/beer-pour.css']){
+  for(const file of ['app/restaurant-site.css']){
     const css=await readFile(file,'utf8');
     for(const token of css.match(/#[\da-f]{3,8}\b/gi)||[]){
       const raw=token.slice(1).toLowerCase();

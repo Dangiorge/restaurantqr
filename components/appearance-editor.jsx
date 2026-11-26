@@ -1,5 +1,10 @@
 "use client";
 
+import '@/app/guest-menu.css';
+import '@/app/guest-discovery.css';
+import '@/app/guest-actions.css';
+import '@/app/guest-appearance.css';
+import '@/app/guest-dishes.css';
 import {useState} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';

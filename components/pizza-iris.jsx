@@ -1,5 +1,6 @@
 "use client";
 
+import '@/app/pizza-iris.css';
 import {useEffect,useRef} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -80,7 +81,7 @@ export default function PizzaIris(){
         <div className="rs-iris-orbit" aria-hidden="true"/>
         <div className="rs-iris-wheel" role="img" aria-label="Eight pizza slices arranged around the original Romina Restaurants logo">
           <div className="rs-iris-brand" aria-hidden="true"><Image className="rs-iris-emblem" src="/brand/romina-emblem.svg" alt="" width={160} height={160} unoptimized/><Image className="rs-iris-wordmark" src="/brand/romina-wordmark.svg" alt="" width={220} height={53} unoptimized/></div>
-          {pizzas.map((pizza,index)=><div className="rs-iris-blade" key={pizza.file} style={bladeStyle(index,pizza.scale)} aria-hidden="true"><div className="rs-iris-photo"><Image src={`/pizza/pizza (${pizza.file}).jpg`} alt="" fill unoptimized sizes="(max-width:700px) 75vw, (max-height:800px) 420px, 560px"/></div></div>)}
+          {pizzas.map((pizza,index)=><div className="rs-iris-blade" key={pizza.file} style={bladeStyle(index,pizza.scale)} aria-hidden="true"><div className="rs-iris-photo"><Image src={`/pizza/pizza (${pizza.file}).jpg`} alt="" fill sizes="(max-width:700px) 75vw, (max-height:800px) 420px, 560px"/></div></div>)}
         </div>
       </div>
       <div className="rs-iris-footer"><p className="rs-iris-instruction">Scroll to close. Scroll back to open.</p><Link href="/menu?view=menu" className="rs-button">Explore the menu</Link></div>

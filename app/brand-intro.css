@@ -1,33 +1,42 @@
-/* The primary artwork stays intact; the plate and curtains animate around it. */
-.romina-intro{display:none;position:fixed;inset:0;z-index:1000;place-items:center;pointer-events:none;isolation:isolate;overflow:hidden}
-.romina-intro[data-play=true]{display:grid;animation:romina-intro-dismiss .01s linear 1.95s both}
-.romina-intro:before,.romina-intro:after{content:'';position:absolute;inset:0 50% 0 0;background:#fff;z-index:-1;animation:romina-curtain-left .8s cubic-bezier(.76,0,.24,1) 1.15s both}
-.romina-intro:after{inset:0 0 0 50%;animation-name:romina-curtain-right}
-.romina-intro-stage{display:grid;justify-items:center;gap:26px;animation:romina-stage-away .4s ease 1.05s both}
+/* Loading screen: the plate ring, bar and percentage follow real page progress
+   (set as CSS variables by the inline loader in components/brand-intro.jsx),
+   then the white curtains open onto the hero. */
+.romina-intro{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;isolation:isolate;overflow:hidden;--p:var(--romina-progress,0)}
+html[data-romina-entry=done] .romina-intro{display:none}
+html[data-romina-entry=revealing] .romina-intro{pointer-events:none;animation:romina-intro-dismiss .01s linear 1.1s both}
+.romina-intro:before,.romina-intro:after{content:'';position:absolute;inset:0 50% 0 0;background:#fff;z-index:-1}
+.romina-intro:after{inset:0 0 0 50%}
+html[data-romina-entry=revealing] .romina-intro:before{animation:romina-curtain-left .8s cubic-bezier(.76,0,.24,1) .25s both}
+html[data-romina-entry=revealing] .romina-intro:after{animation:romina-curtain-right .8s cubic-bezier(.76,0,.24,1) .25s both}
+.romina-intro-stage{display:grid;justify-items:center;gap:24px}
+html[data-romina-entry=revealing] .romina-intro-stage{animation:romina-stage-away .35s ease both}
 .romina-intro-origin{display:flex;align-items:center;gap:12px;color:#76777a;font:600 11px/1.6 'Poppins',Arial,sans-serif;letter-spacing:2.5px;animation:romina-arrive .55s ease both}
 .romina-intro-origin>span{width:4px;height:4px;border-radius:50%;background:#D42028}
-.romina-intro-plate{position:relative;display:grid;place-items:center;width:min(360px,78vw,56svh);aspect-ratio:1}
+.romina-intro-plate{position:relative;display:grid;place-items:center;width:min(340px,74vw,50svh);aspect-ratio:1}
 .romina-intro-ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .romina-intro-ring circle:first-child{stroke:#0000000c;stroke-width:1}
-.romina-intro-ring circle:last-child{stroke:#D42028;stroke-opacity:.5;stroke-width:1;stroke-dasharray:100;transform:rotate(-90deg);transform-origin:center;animation:romina-plate-draw 1.05s cubic-bezier(.3,0,.2,1) both}
+.romina-intro-ring circle:last-child{stroke:#D42028;stroke-opacity:.65;stroke-width:1.5;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:calc(100 - var(--p)*100);transform:rotate(-90deg);transform-origin:center}
 .romina-intro-plate img{display:block;width:58%;height:auto;animation:romina-artwork-in .65s ease .1s both}
-.romina-intro-signature{font:400 14px/1.6 'Poppins',Arial,sans-serif;color:#000;animation:romina-arrive .6s ease .25s both}
-.romina-intro-line{width:64px;height:2px;background:#D42028;transform-origin:left;animation:romina-line-in .8s ease .2s both}
-/* Reveal the food first, followed by the headline, actions and navigation. */
-html[data-romina-entry=opening] .rs-hero-content,html[data-romina-entry=opening] .rs-header>.rs-logo,html[data-romina-entry=opening] .rs-header>nav,html[data-romina-entry=opening] .rs-mobile-toggle,html[data-romina-entry=opening] .rs-hero-caption{opacity:0}
-html[data-romina-entry=revealing] .rs-hero-content{animation:romina-hero-arrive .85s cubic-bezier(.2,.7,.2,1) .12s both;transition:none}
-html[data-romina-entry=revealing] .rs-hero-actions{animation:romina-hero-arrive .65s ease .35s both}
-html[data-romina-entry=revealing] .rs-header>.rs-logo,html[data-romina-entry=revealing] .rs-header>nav,html[data-romina-entry=revealing] .rs-mobile-toggle{animation:romina-nav-arrive .65s ease .2s both}
-html[data-romina-entry=revealing] .rs-hero-caption{animation:romina-hero-arrive .8s ease .4s both}
-@keyframes romina-plate-draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+.romina-intro-signature{font:400 14px/1.6 'Poppins',Arial,sans-serif;color:#000;animation:romina-arrive .6s ease .2s both}
+.romina-intro-progress{display:grid;justify-items:center;gap:11px;width:200px;animation:romina-arrive .6s ease .3s both}
+.romina-intro-bar{display:block;width:100%;height:2px;border-radius:2px;background:#0000000f;overflow:hidden}
+.romina-intro-bar>i{display:block;height:100%;background:#D42028;transform:scaleX(var(--p));transform-origin:left}
+.romina-intro-pct{counter-reset:romina var(--romina-pct,0);font:600 11px/1 'Poppins',Arial,sans-serif;letter-spacing:2px;color:#76777a;font-variant-numeric:tabular-nums}
+.romina-intro-pct:after{content:counter(romina) '%'}
+/* While loading, hold the page still and hide the hero copy; it arrives as the curtains open. */
+html[data-romina-entry=loading]{overflow:hidden}
+html[data-romina-entry=loading] .rs-hero-content,html[data-romina-entry=loading] .rs-header>.rs-logo,html[data-romina-entry=loading] .rs-header>nav,html[data-romina-entry=loading] .rs-mobile-toggle,html[data-romina-entry=loading] .rs-hero-caption{opacity:0}
+html[data-romina-entry=revealing] .rs-hero-content{animation:romina-hero-arrive .85s cubic-bezier(.2,.7,.2,1) .45s both;transition:none}
+html[data-romina-entry=revealing] .rs-hero-actions{animation:romina-hero-arrive .65s ease .7s both}
+html[data-romina-entry=revealing] .rs-header>.rs-logo,html[data-romina-entry=revealing] .rs-header>nav,html[data-romina-entry=revealing] .rs-mobile-toggle{animation:romina-nav-arrive .65s ease .55s both}
+html[data-romina-entry=revealing] .rs-hero-caption{animation:romina-hero-arrive .8s ease .75s both}
 @keyframes romina-arrive{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
 @keyframes romina-artwork-in{from{opacity:0}to{opacity:1}}
-@keyframes romina-line-in{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes romina-stage-away{to{opacity:0;transform:translateY(-16px)}}
 @keyframes romina-curtain-left{to{transform:translateX(-101%)}}
 @keyframes romina-curtain-right{to{transform:translateX(101%)}}
 @keyframes romina-intro-dismiss{to{visibility:hidden}}
 @keyframes romina-hero-arrive{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 @keyframes romina-nav-arrive{from{opacity:0}to{opacity:1}}
-@media(prefers-reduced-motion:reduce){.romina-intro[data-play=true]{display:none}html[data-romina-entry] .rs-site .rs-hero-content,html[data-romina-entry] .rs-site .rs-header>*,html[data-romina-entry] .rs-site .rs-hero-caption{opacity:1;animation:none}}
-@media print{.romina-intro[data-play=true]{display:none}}
+@media(prefers-reduced-motion:reduce){html[data-romina-entry=revealing] .romina-intro{display:none}html[data-romina-entry] .rs-site .rs-hero-content,html[data-romina-entry] .rs-site .rs-header>*,html[data-romina-entry] .rs-site .rs-hero-caption{animation:none}html[data-romina-entry=revealing] .rs-site .rs-hero-content,html[data-romina-entry=revealing] .rs-site .rs-header>*,html[data-romina-entry=revealing] .rs-site .rs-hero-caption{opacity:1}}
+@media print{.romina-intro{display:none}}

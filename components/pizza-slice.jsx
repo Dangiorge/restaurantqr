@@ -1,5 +1,6 @@
 "use client";
 
+import '@/app/pizza-slice.css';
 import {useEffect,useRef} from 'react';
 import Link from 'next/link';
 import {useSiteMotionPaused} from './site-motion';
@@ -42,11 +43,21 @@ export default function PizzaSlice(){
     function schedule(){if(!raf&&!disposed)raf=requestAnimationFrame(paint);}
     function onLoaded(){loaded=true;schedule();}
     film.addEventListener('loadedmetadata',onLoaded);
+    // Scrubbing seeks to arbitrary frames, which stalls on a partly downloaded stream.
+    // Fetch the whole (small) file well ahead of time and play it from memory.
+    let blobUrl='',requested=false;
+    function load(){
+      if(requested)return;
+      requested=true;
+      fetch(SRC).then(response=>{if(!response.ok)throw new Error();return response.blob();})
+        .then(blob=>{if(disposed)return;blobUrl=URL.createObjectURL(blob);film.src=blobUrl;film.load();})
+        .catch(()=>{if(!disposed){film.src=SRC;film.load();}});
+    }
     const nearby=new IntersectionObserver(entries=>{
       near=entries[0].isIntersecting;
-      if(near&&!film.getAttribute('src')){film.src=SRC;film.load();}
+      if(near)load();
       schedule();
-    },{rootMargin:'400px 0px'});
+    },{rootMargin:'1600px 0px'});
     const onscreen=new IntersectionObserver(entries=>{active=entries[0].isIntersecting;schedule();},{threshold:.1});
     nearby.observe(root);onscreen.observe(root);
     root.dataset.mode=restricted()?'still':'scroll';
@@ -59,6 +70,7 @@ export default function PizzaSlice(){
     return()=>{
       disposed=true;nearby.disconnect();onscreen.disconnect();cancelAnimationFrame(raf);
       film.removeEventListener('loadedmetadata',onLoaded);film.pause();
+      if(blobUrl)URL.revokeObjectURL(blobUrl);
       window.removeEventListener('scroll',schedule);window.removeEventListener('resize',schedule);
       document.removeEventListener('visibilitychange',schedule);preference.removeEventListener('change',schedule);connection?.removeEventListener('change',schedule);
     };
