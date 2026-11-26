@@ -71,7 +71,6 @@ export default function RominaHistory(){
     <section className="rh-growth" aria-labelledby="history-growth-title">
       <div className="rh-growth-heading" data-history-reveal><span className="rh-kicker">FROM ONE RESTAURANT, NEW POSSIBILITIES.</span><h2 id="history-growth-title">The family<br/><em>grew.</em></h2><p>New names. New chapters.<br/>The same roots.</p></div>
       <ol className="rh-timeline">{milestones.map(([year,name,description],index)=><li key={year} data-history-reveal style={{'--history-delay':`${index*65}ms`}}><span className="rh-milestone-year">{year}</span><i aria-hidden="true"/><h3>{name}</h3><p>{description}</p></li>)}</ol>
-      <div className="rh-kazanchis" data-history-reveal><span className="rh-kicker">AND THE RESTAURANT STORY KEPT GROWING.</span><p>Beyond 4 Kilo, the Kazanchis branch brought guests closer to the kitchen, with food prepared in view.</p></div>
     </section>
 
     <section id="history-homecoming" className="rh-homecoming" data-history-scene="homecoming" aria-labelledby="history-homecoming-title">
