@@ -18,7 +18,7 @@ import './guest-appearance.css';
 import './guest-dishes.css';
 import './restaurant-site.css';
 import './catering-form.css';
-import './pizza-float.css';
+import './pizza-iris.css';
 import './pizza-slice.css';
 import './cuisine-atlas.css';
 import './romina-history.css';

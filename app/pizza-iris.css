@@ -1,0 +1,46 @@
+/* Eight radial photo blades close around their shared centre like an iris. */
+.rs-iris{--iris-progress:1;--iris-size:min(42svh,62vw,500px);position:relative;isolation:isolate;color:#fff;background:#0a0a0a}
+.rs-iris-pin{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:850px;padding:125px 5% 45px;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at 50% 53%,#d4202819,transparent 62%)}
+.rs-iris[data-mode=scroll]{--iris-progress:0;height:215svh}
+.rs-iris[data-mode=scroll] .rs-iris-pin{position:sticky;top:0;height:100svh;min-height:0}
+.rs-iris-heading{position:relative;z-index:2;flex-shrink:0;text-align:center}
+.rs-iris-heading>span{display:block;color:#fffb;font-size:.875rem;font-weight:600;letter-spacing:.18em;line-height:1.4;margin-bottom:12px}
+.rs-site .rs-iris h2{font-size:clamp(48px,5.2vw,78px);font-weight:600;letter-spacing:-1.8px;line-height:.98;margin:0 0 16px;color:#fff}
+.rs-site .rs-iris h2 em{color:#fff;font-weight:600}
+.rs-iris-heading>p{font-size:1rem;line-height:1.6;color:#fffb;margin:0}
+.rs-iris-stage{position:relative;display:grid;place-items:center;width:100%;flex:1;min-height:calc(var(--iris-size)*1.28);margin:8px 0}
+.rs-iris-orbit{position:absolute;width:calc(var(--iris-size)*1.13);aspect-ratio:1;border:1px solid #ffffff18;border-radius:50%;pointer-events:none;transform:rotate(calc((1 - var(--iris-progress))*-28deg))}
+.rs-iris-orbit:after{content:'';position:absolute;inset:-15px;border:1px solid #d4202829;border-radius:50%}
+.rs-iris-wheel{position:relative;isolation:isolate;width:var(--iris-size);aspect-ratio:1;filter:drop-shadow(0 18px 30px #0008)}
+.rs-iris-brand{position:absolute;left:50%;top:50%;width:32%;display:flex;align-items:center;flex-direction:column;gap:12px;transform:translate(-50%,-50%);z-index:0;pointer-events:none;filter:drop-shadow(0 4px 12px #0006)}
+.rs-iris-brand .rs-iris-emblem{width:66%;height:auto}.rs-iris-brand .rs-iris-wordmark{width:100%;height:auto;filter:invert(1)}
+.rs-iris-blade{--blade-close:clamp(0,calc(var(--iris-progress)*1.22 - var(--blade-index)*.022),1);--blade-open:calc(1 - var(--blade-close));position:absolute;inset:0;transform:translate3d(calc(var(--blade-open)*var(--blade-x)),calc(var(--blade-open)*var(--blade-y)),0) rotate(calc(var(--blade-open)*-42deg));z-index:1}
+.rs-iris-photo{position:absolute;inset:0;overflow:hidden;border-radius:50%;background:#0a0a0a}
+.rs-iris-photo>img{object-fit:cover;object-position:center;transform:scale(var(--image-scale));border-radius:50%}
+.rs-iris-footer{position:relative;z-index:2;text-align:center;flex-shrink:0}
+.rs-iris-footer>p{font-size:.875rem;color:#fffb;line-height:1.5;margin:0 0 14px}
+.rs-iris-footer>.rs-button{font-size:.9375rem;min-height:50px;padding:13px 27px}
+.rs-iris[data-mode=still] .rs-iris-blade{transform:none}
+.rs-iris[data-mode=still] .rs-iris-instruction{display:none}
+@media(max-height:800px) and (min-width:701px){.rs-iris{--iris-size:min(36svh,60vw,420px)}.rs-iris-pin{padding-top:110px;padding-bottom:24px}.rs-site .rs-iris h2{font-size:55px;margin-bottom:11px}.rs-iris-heading>span{margin-bottom:8px}.rs-iris-footer>p{margin-bottom:10px}}
+@media(max-width:700px){.rs-iris{--iris-size:min(39svh,70vw,440px)}.rs-iris-pin{padding:112px 5% 32px;min-height:740px}.rs-iris-heading{width:100%;max-width:400px}.rs-iris-heading>span{font-size:.8125rem;letter-spacing:.16em;margin-bottom:15px}.rs-site .rs-iris h2{font-size:clamp(43px,11vw,68px);letter-spacing:-1.2px;line-height:1.02;max-width:340px;margin:0 auto 16px}.rs-iris h2 em{display:block}.rs-iris-stage{margin:16px 0;min-height:calc(var(--iris-size)*1.25)}.rs-iris-footer>p{font-size:.8125rem;max-width:270px;margin:0 auto 15px}.rs-iris-footer>.rs-button{font-size:.9375rem}.rs-iris[data-mode=still] .rs-iris-pin{min-height:0;padding-top:75px;padding-bottom:60px}.rs-iris[data-mode=still] .rs-iris-stage{flex:none;margin-block:35px}}
+@media(prefers-reduced-motion:reduce){.rs-iris .rs-iris-blade{transform:none!important}.rs-iris-orbit{transform:none}}
+@media(max-width:700px) and (max-height:800px){.rs-iris{--iris-size:min(32svh,70vw,350px)}.rs-iris-pin{padding-top:105px;padding-bottom:24px}.rs-iris-heading>span{margin-bottom:10px}.rs-site .rs-iris h2{font-size:48px;margin-bottom:12px}.rs-iris-stage{margin-block:8px}}
+/* On wide screens the copy flanks the centred pizza, freeing its full height. */
+@media(min-width:1280px){
+ .rs-iris{--iris-size:min(62svh,42vw,800px)}
+ .rs-iris-pin{padding:110px 0 30px;min-height:900px}
+ .rs-iris-heading{position:absolute;left:5%;top:50%;width:14vw;max-width:300px;text-align:left;transform:translateY(-50%)}
+ .rs-site .rs-iris h2{font-size:clamp(44px,3.6vw,64px);line-height:1.02;letter-spacing:-1.3px;margin-bottom:20px}
+ .rs-iris h2 em{display:block}
+ .rs-iris-heading>span{font-size:.875rem;letter-spacing:.14em;margin-bottom:20px}
+ .rs-iris-heading>p{font-size:1rem;line-height:1.7;max-width:230px}
+ .rs-iris-stage{min-height:0;height:100%;margin:0;flex:1}
+ .rs-iris-footer{position:absolute;right:5%;top:50%;width:14vw;max-width:250px;text-align:left;transform:translateY(-50%)}
+ .rs-iris-footer>p{font-size:.875rem;line-height:1.7;max-width:220px;margin-bottom:22px}
+ .rs-iris-footer>.rs-button{padding-inline:22px;white-space:nowrap}
+ .rs-iris[data-mode=still] .rs-iris-pin{height:100svh;min-height:850px}
+}
+@media(min-width:1280px) and (max-height:800px){.rs-iris{--iris-size:min(60svh,40vw,650px)}}
+@media(max-width:700px){.rs-iris-brand{gap:7px}}
+@media print{.rs-iris{height:auto!important;color:#000;background:#fff}.rs-iris-pin{height:auto!important;position:relative!important;min-height:0!important;padding:35px;background:none}.rs-site .rs-iris h2,.rs-site .rs-iris h2 em,.rs-iris-heading>span,.rs-iris-heading>p{color:#000}.rs-iris-stage{flex:none;min-height:400px}.rs-iris-wheel{width:340px;filter:none}.rs-iris-blade{transform:none!important}.rs-iris-instruction,.rs-iris-orbit{display:none}}

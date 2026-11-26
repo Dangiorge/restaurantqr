@@ -6,7 +6,7 @@ import CuisineJourney from './cuisine-journey';
 import RominaHistory from './romina-history';
 import RestaurantFilm from './restaurant-film';
 import HeroGallery from './hero-gallery';
-import PizzaFloat from './pizza-float';
+import PizzaIris from './pizza-iris';
 import PizzaSlice from './pizza-slice';
 import MenuIcon from './menu-icons';
 import CateringForm from './catering-form';
@@ -75,7 +75,7 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
         </div>
       </section>
 
-      <PizzaFloat/>
+      <PizzaIris/>
       <PizzaSlice/>
 
       <section id="experience" className="rs-tastes rs-section" aria-labelledby="tastes-title">
