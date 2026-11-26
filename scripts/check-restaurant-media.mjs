@@ -42,7 +42,7 @@ try{
   assert.equal(await kitchen.locator('video').evaluate(video=>video.paused),true,'Offscreen footage pauses');
   await page.locator('#visit .rs-film').scrollIntoViewIfNeeded();await page.waitForFunction(()=>document.querySelector('#visit video').currentTime>.1);
   assert.equal(new Set(movieRequests).size,3,'Each reviewed non-beer video has its own section');
-  await page.locator('#history-second-home').scrollIntoViewIfNeeded();await page.locator('.rh-memories-copy').getByText('Students, teachers, families.',{exact:false}).waitFor();
+  await page.locator('#history-thread').scrollIntoViewIfNeeded();await page.locator('.rt-stop').getByText('Students, teachers, families.',{exact:false}).waitFor();
   await page.getByRole('button',{name:'Pause website animations'}).click();
   await page.screenshot({path:'.local/previews/romina-curated-story.png'});
   // Expand the sticky scene only for the static full-page capture: otherwise

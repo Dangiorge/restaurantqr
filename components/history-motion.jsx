@@ -15,23 +15,16 @@ export default function HistoryMotion({children}){
     const element=root.current;
     const scenes=[...element.querySelectorAll('[data-history-scene]')];
     const reveals=[...element.querySelectorAll('[data-history-reveal]')];
-    const films=[...element.querySelectorAll('.rh-film-scene')];
     const homeColorCue=element.querySelector('[data-home-color-cue]');
     const preference=matchMedia('(prefers-reduced-motion: reduce)');
     const connection=navigator.connection;
-    let frame=0,disposed=false,observer,filmObserver;
+    let frame=0,disposed=false,observer;
     const still=()=>preference.matches||connection?.saveData||innerHeight<620;
     function configure(){
       observer?.disconnect();
-      filmObserver?.disconnect();
-      films.forEach(film=>film.dataset.filmActive='false');
       element.dataset.historyMotion=still()?'still':'scroll';
       if(still()){reveals.forEach(node=>node.dataset.historyVisible='true');return;}
       if('IntersectionObserver' in window){
-        filmObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
-          entry.target.dataset.filmActive=entry.isIntersecting?'true':'false';
-        }));
-        films.forEach(film=>filmObserver.observe(film));
         observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
           if(entry.isIntersecting){entry.target.dataset.historyVisible='true';observer.unobserve(entry.target);}
         }),{threshold:.12});
@@ -45,11 +38,6 @@ export default function HistoryMotion({children}){
       scenes.forEach(scene=>{
         const bounds=scene.getBoundingClientRect();
         if(bounds.bottom<0||bounds.top>innerHeight)return;
-        if(scene.dataset.historyScene==='newspaper'){
-          const opening=clamp((innerHeight*.92-bounds.top)/Math.max(1,Math.min(innerHeight*.56,400)));
-          scene.style.setProperty('--paper-open',opening.toFixed(4));
-          return;
-        }
         const pinned=scene.querySelector('.rh-opening-pin,.rh-family-pin');
         const progress=pinned?clamp(-bounds.top/Math.max(1,bounds.height-innerHeight)):clamp((innerHeight-bounds.top)/(innerHeight+bounds.height));
         scene.style.setProperty('--history-progress',progress.toFixed(4));
@@ -68,7 +56,7 @@ export default function HistoryMotion({children}){
     window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',resize);
     preference.addEventListener('change',configure);connection?.addEventListener('change',configure);document.addEventListener('visibilitychange',schedule);
     return()=>{
-      disposed=true;cancelAnimationFrame(frame);observer?.disconnect();filmObserver?.disconnect();
+      disposed=true;cancelAnimationFrame(frame);observer?.disconnect();
       window.removeEventListener('scroll',schedule);window.removeEventListener('resize',resize);
       preference.removeEventListener('change',configure);connection?.removeEventListener('change',configure);document.removeEventListener('visibilitychange',schedule);
     };

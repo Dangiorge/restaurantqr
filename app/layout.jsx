@@ -22,9 +22,8 @@ import './pizza-iris.css';
 import './pizza-slice.css';
 import './cuisine-atlas.css';
 import './romina-history.css';
-import './romina-newspaper.css';
+import './romina-thread.css';
 import './restaurant-art.css';
-import './aged-film.css';
 
 export const metadata = {
   title: "Tableline · Restaurant workspace",

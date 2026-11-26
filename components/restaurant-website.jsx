@@ -30,11 +30,7 @@ export default function RestaurantWebsite({restaurant,staticPreview=false}){
     <SiteHeader/>
     <main id="main-content">
       <section className="rs-hero" aria-labelledby="site-hero-title">
-        <HeroGallery slides={[
-          {src:`${MEDIA}sharing-platter.webp`,alt:'A colourful traditional platter served on injera at Romina'},
-          {src:`${MEDIA}dining-room.webp`,alt:'A welcoming Romina dining room with tables and a banquette'},
-          {src:`${MEDIA}terrace.webp`,alt:'Outdoor tables under red Romina parasols'},
-        ]}/>
+        <HeroGallery slides={[{src:'/herobackground.jpg',alt:'A plated steak with mashed potatoes and vegetables, with wine and bread on a Romina table'}]}/>
         <div className="rs-hero-shade"/>
         <div className="rs-hero-content" data-site-reveal="up">
           <span className="rs-eyebrow rs-light"><i/> ADDIS ABABA · SINCE 1973</span>

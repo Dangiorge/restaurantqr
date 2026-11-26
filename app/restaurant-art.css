@@ -1,6 +1,4 @@
 /* Food, type and motion: a focused art-direction layer for the marketing page. */
-.rh-press{--paper-stock:#f4f1e8;background:#faf9f6}
-.rh-paper-fold:before{opacity:.48}.rh-paper-fold:after{opacity:.09}
 .rs-menu-section{position:relative;isolation:isolate;padding-top:115px;padding-bottom:95px}
 .rs-menu-section:before{content:'';position:absolute;top:75px;left:-20%;width:480px;height:480px;border:1px solid #d4202812;border-radius:50%;z-index:-1;box-shadow:0 0 0 35px #d4202805,0 0 0 70px #d4202803;pointer-events:none}
 .rs-menu-heading{margin-bottom:60px;align-items:center}.rs-menu-heading>div:first-child{position:relative}

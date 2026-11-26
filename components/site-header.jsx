@@ -25,8 +25,8 @@ export default function SiteHeader(){
   },[open]);
   return <header ref={header} className="rs-header" data-scrolled="false" data-open={open}>
     <Link href="/" className="rs-logo" aria-label="Romina Restaurants home">
-      <Image className="rs-logo-emblem" src="/brand/romina-emblem.svg" alt="" width={52} height={52} priority/>
-      <Image className="rs-logo-wordmark" src="/brand/romina-wordmark.svg" alt="" width={154} height={37} priority/>
+      <Image className="rs-logo-emblem" src="/brand/romina-emblem.svg" alt="" width={64} height={64} priority/>
+      <Image className="rs-logo-wordmark" src="/brand/romina-wordmark.svg" alt="" width={190} height={46} priority/>
     </Link>
     <button ref={toggle} className="rs-mobile-toggle" aria-expanded={open} aria-controls="site-navigation" aria-label={open?'Close navigation':'Open navigation'} onClick={()=>setOpen(value=>!value)}><MenuIcon name={open?'close':'menu'} size={23}/></button>
     <nav id="site-navigation" className={open?'rs-nav-open':''} aria-label="Main navigation" onClick={()=>setOpen(false)}>
